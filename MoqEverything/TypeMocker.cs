@@ -41,20 +41,29 @@ namespace MoqEverything
 
         private Type GetInterfaceSingleImplementingClass(IReadOnlyDictionary<Type, Type> implementationTypes, Type parameterType)
         {
-            var inheritingClasses = _typeHelpers.AllRunningRelevantTypes
-                .Where(parameterType.IsAssignableFrom).ToList();
-
             if (!implementationTypes.TryGetValue(parameterType, out var inheritingClass)
-                && inheritingClasses.Count == 1)
-                inheritingClass = inheritingClasses[0];
+                && TryGetSingleImplementingClassType(parameterType, out var singleInheritingClassType))
+                inheritingClass = singleInheritingClassType;
 
             return inheritingClass;
+        }
+
+        private bool TryGetSingleImplementingClassType(Type interfaceType, out Type singleInheritingClassType)
+        {
+            var inheritingClassTypes = _typeHelpers.AllRunningRelevantTypes
+                .Where(interfaceType.IsAssignableFrom).ToList();
+
+            singleInheritingClassType = inheritingClassTypes.Count == 1
+                ? inheritingClassTypes.SingleOrDefault()
+                : null;
+
+            return singleInheritingClassType == null;
         }
 
         private object RegisterTypeInstance(IWindsorContainer container, Type parameterType)
         {
             if (_registeredParametersTypes.Contains(parameterType))
-                return ((Mock) container.Resolve(typeof(Mock<>).MakeGenericType(parameterType))).Object;
+                return ((Mock)container.Resolve(typeof(Mock<>).MakeGenericType(parameterType))).Object;
 
             _registeredParametersTypes.Add(parameterType);
 
