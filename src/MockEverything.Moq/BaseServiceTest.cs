@@ -1,17 +1,17 @@
-﻿using Castle.MicroKernel.Registration;
+﻿using System;
+using System.Collections.Generic;
+using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Moq;
-using System;
-using System.Collections.Generic;
 
-namespace MoqEverything
+namespace MockEverything.Moq
 {
     /// <summary>
     /// Base class which provides full recursive mocking of all the dependent classes, and methods to help with testing.
     /// </summary>
     /// <typeparam name="TService">The service being test.</typeparam>
     /// <typeparam name="TIService">The interface of the service which methods are tested.</typeparam>
-    public abstract class ServiceTestBase<TIService, TService> : IDisposable
+    public abstract class BaseServiceTest<TIService, TService> : IDisposable
         where TIService : class
         where TService : class, TIService
     {
@@ -22,7 +22,7 @@ namespace MoqEverything
         private readonly TypeHelpers _typeHelpers;
         private readonly TypeMocker _typeMocker;
 
-        protected ServiceTestBase()
+        protected BaseServiceTest()
         {
             _typeHelpers = new TypeHelpers();
             _typeMocker = new TypeMocker(_typeHelpers);

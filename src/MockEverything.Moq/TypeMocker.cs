@@ -5,7 +5,7 @@ using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Moq;
 
-namespace MoqEverything
+namespace MockEverything.Moq
 {
     public class TypeMocker
     {

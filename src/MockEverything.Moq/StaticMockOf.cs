@@ -1,6 +1,6 @@
 ﻿using Moq;
 
-namespace MoqEverything
+namespace MockEverything.Moq
 {
     public static class StaticMockOf<T> where T : class
     {
