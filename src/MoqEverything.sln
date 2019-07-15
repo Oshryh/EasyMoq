@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoqEverything", "MoqEverything\MoqEverything.csproj", "{43057F17-663D-42B9-AF11-FEA937C89B6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockEverything.Moq", "MockEverything.Moq\MockEverything.Moq.csproj", "{43057F17-663D-42B9-AF11-FEA937C89B6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
