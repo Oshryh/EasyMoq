@@ -34,7 +34,7 @@ namespace MockEverything.Moq
 
             Container.Register(
                 Component.For<TIService>()
-                    .Instance((TIService)_typeMocker.RegisterMockAndGetInstance(Container, typeof(TService))));
+                    .Instance((TIService)_typeMocker.RegisterMockAndGetInstance(Container, typeof(TService), typeof(TIService))));
         }
 
         protected virtual void Prepare() { }
@@ -85,9 +85,9 @@ namespace MockEverything.Moq
             return service;
         }
 
-        protected Mock<TService> GetTestedMockService()
+        protected Mock<TIService> GetTestedMockService()
         {
-            var service = Container.Resolve<Mock<TService>>();
+            var service = Container.Resolve<Mock<TIService>>();
             return service;
         }
 
