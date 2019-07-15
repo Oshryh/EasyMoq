@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockEverything.Moq", "MockEverything.Moq\MockEverything.Moq.csproj", "{43057F17-663D-42B9-AF11-FEA937C89B6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockEverything.Moq", "MockEverything.Moq\MockEverything.Moq.csproj", "{43057F17-663D-42B9-AF11-FEA937C89B6A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockEverything.Moq.Tests", "MockEverything.Moq.Tests\MockEverything.Moq.Tests.csproj", "{2B5FC534-64D7-4D1B-818C-A0AC1B058D62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{43057F17-663D-42B9-AF11-FEA937C89B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43057F17-663D-42B9-AF11-FEA937C89B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43057F17-663D-42B9-AF11-FEA937C89B6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B5FC534-64D7-4D1B-818C-A0AC1B058D62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B5FC534-64D7-4D1B-818C-A0AC1B058D62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B5FC534-64D7-4D1B-818C-A0AC1B058D62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B5FC534-64D7-4D1B-818C-A0AC1B058D62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

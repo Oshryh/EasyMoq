@@ -75,14 +75,12 @@ namespace MockEverything.Moq
             return RegisterMockAndGetInstance(container, parameterType, parameterType);
         }
 
-        private object RegisterMockAndGetInstance(IWindsorContainer container, Type parameterType, Type parameterInterfaceType)
+        public object RegisterMockAndGetInstance(IWindsorContainer container, Type parameterType, Type parameterInterfaceType)
         {
             var constructorParametersInstances = ConstructorParametersInstancesArray(container, parameterType);
 
             var mockedType = typeof(Mock<>).MakeGenericType(parameterType);
             var newMockInstance = Activator.CreateInstance(mockedType, constructorParametersInstances);
-            ((Mock)newMockInstance).CallBase = true;
-
             var mockedInterfaceType = typeof(Mock<>).MakeGenericType(parameterInterfaceType);
 
             if (parameterInterfaceType != parameterType)
@@ -92,6 +90,7 @@ namespace MockEverything.Moq
                     .Invoke(newMockInstance, new object[0]);
             }
 
+            ((Mock)newMockInstance).CallBase = true;
             container.Register(Component.For(mockedInterfaceType).Instance(newMockInstance));
 
             return ((Mock)newMockInstance).Object;
