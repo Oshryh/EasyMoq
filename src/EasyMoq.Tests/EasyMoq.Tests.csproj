@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MockEverything.Moq\MockEverything.Moq.csproj" />
+    <ProjectReference Include="..\MockEverything.Moq\EasyMoq.csproj" />
   </ItemGroup>
 
 </Project>
