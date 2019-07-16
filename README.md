@@ -1,1 +1,1 @@
-# MoqEverything
+# EasyMoq
