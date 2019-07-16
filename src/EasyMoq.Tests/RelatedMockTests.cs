@@ -1,9 +1,8 @@
+using EasyMoq.Tests.TestModelClasses;
 using FluentAssertions;
-using MockEverything.Moq.XUnit.Tests.TestModelClasses;
-using Moq;
 using Xunit;
 
-namespace MockEverything.Moq.XUnit.Tests
+namespace EasyMoq.Tests
 {
     public class RelatedMockTests : BaseServiceTest<Interface2, Class2>
     {

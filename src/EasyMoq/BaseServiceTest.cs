@@ -4,7 +4,7 @@ using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Moq;
 
-namespace MockEverything.Moq
+namespace EasyMoq
 {
     /// <summary>
     /// Base class which provides full recursive mocking of all the dependent classes, and methods to help with testing.

@@ -5,7 +5,7 @@ using Castle.MicroKernel;
 using Castle.MicroKernel.Context;
 using Moq;
 
-namespace MockEverything.Moq
+namespace EasyMoq
 {
     public class AutoMoqResolver : ISubDependencyResolver
     {

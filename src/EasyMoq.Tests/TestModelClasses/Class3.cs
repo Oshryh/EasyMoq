@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MockEverything.Moq.XUnit.Tests.TestModelClasses
+﻿namespace EasyMoq.Tests.TestModelClasses
 {
     public class Class3 : Interface3
     {
