@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <Version>0.0.1</Version>
-    <PackageId>MockEverything.Moq</PackageId>
-    <PackageProjectUrl>https://github.com/Oshryh/MockEverything</PackageProjectUrl>
+    <PackageId>EasyMoq</PackageId>
+    <PackageProjectUrl>https://github.com/Oshryh/EasyMoq</PackageProjectUrl>
     <PackageTags>Mock;Moq;Test;UnitTest</PackageTags>
     <Authors>OshryH</Authors>
-    <Description>MockEverything.Moq is a lightweight library for minimizing the mocking overhead of writing of tests.</Description>
-    <RepositoryUrl>https://github.com/Oshryh/MockEverything</RepositoryUrl>
+    <Description>EasyMoq is a lightweight library for minimizing the mocking overhead of writing of tests.</Description>
+    <RepositoryUrl>https://github.com/Oshryh/EasyMoq</RepositoryUrl>
     <Copyright>Copyright 2019 Oshry Horn</Copyright>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
