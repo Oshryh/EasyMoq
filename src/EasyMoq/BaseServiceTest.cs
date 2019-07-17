@@ -56,27 +56,7 @@ namespace EasyMoq
 
             _autoMoqSubResolver.AddRegisteredType(typeof(T));
 
-            Container.Register(
-                Component.For<object>()
-                    .Named(GetNameOfLockObjectOf<T>())
-                    .Instance(StaticMockOf<T>.SettingsLock));
-
             return mockOfStatic;
-        }
-
-        protected object GetStaticLockObjectOfMockOf<T>() where T : class
-        {
-            var nameOfLockObject = GetNameOfLockObjectOf<T>();
-
-            if (!Container.Kernel.HasComponent(nameOfLockObject))
-                AddStaticOfMockToContainer<T>();
-
-            return Container.Resolve<object>(nameOfLockObject);
-        }
-
-        private static string GetNameOfLockObjectOf<T>() where T : class
-        {
-            return "Lock" + nameof(T);
         }
 
         protected TIService GetTestedService()
