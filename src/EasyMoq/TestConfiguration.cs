@@ -11,7 +11,7 @@ namespace EasyMoq
         public List<string> AssembliesNamesParts { get; } = new List<string>();
         public bool UseDefaultClassesForInterfacesFromAssemblies { get; set; }
 
-        public List<Type> AllRunningRelevantTypes { get; private set; }
+        public List<Type> AllRunningRelevantTypes { get; private set; } = new List<Type>();
 
         public void CoupleInterfaceWithClass<TInterface, TClass>()
         {

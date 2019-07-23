@@ -101,7 +101,7 @@ namespace EasyMoq
 
             inheritingClass = inheritingClasses.Count == 1 ? inheritingClasses[0] : null;
 
-            return inheritingClass == null;
+            return inheritingClass != null;
         }
 
         private IEnumerable<Type> GetAllDistinctConstructorsParametersTypes(Type type)
