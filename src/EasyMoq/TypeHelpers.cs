@@ -82,8 +82,11 @@ namespace EasyMoq
                     {
                         typesToCheck.Push(parameterType);
                     }
-                    else if (_testConfiguration.TryGetImplementationType(parameterType, out var inheritingClass)
-                             || TryGetSingleInheritingType(parameterType, out inheritingClass))
+                    else if (_testConfiguration.TryGetImplementationType(parameterType, out var inheritingClass))
+                    {
+                        typesToCheck.Push(inheritingClass);
+                    }
+                    else if (TryGetSingleInheritingType(parameterType, out inheritingClass))
                     {
                         _testConfiguration.CoupleInterfaceWithClass(parameterType, inheritingClass);
                         typesToCheck.Push(inheritingClass);
