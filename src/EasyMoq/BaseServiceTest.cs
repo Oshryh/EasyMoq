@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Castle.MicroKernel.Registration;
-using Castle.Windsor;
 using Moq;
 
 namespace EasyMoq
@@ -11,94 +8,48 @@ namespace EasyMoq
     /// </summary>
     /// <typeparam name="TService">The service being test.</typeparam>
     /// <typeparam name="TIService">The interface of the service which methods are tested.</typeparam>
-    public abstract class BaseServiceTest<TIService, TService> : IDisposable
+    public abstract class BaseServiceTest<TIService, TService> : IBaseServiceTest<TIService>, IDisposable
         where TIService : class
         where TService : class, TIService
     {
-        private IWindsorContainer Container { get; }
-        private readonly Dictionary<Type, Type> _implementationTypes = new Dictionary<Type, Type>();
-        private AutoMoqResolver _autoMoqSubResolver;
+        private readonly MockBuilder<TIService, TService> _mockBuilder = new MockBuilder<TIService, TService>();
 
-        private readonly TypeHelpers _typeHelpers;
-        private readonly TypeMocker _typeMocker;
+        public TestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
 
-        protected BaseServiceTest()
+        public TIService GetTestedService()
         {
-            _typeHelpers = new TypeHelpers();
-            _typeMocker = new TypeMocker(_typeHelpers);
-            Container = new WindsorContainer();
-
-            RegisterAllDependencies<TIService, TService>();
-
-            Prepare();
-
-            Container.Register(
-                Component.For<TIService>()
-                    .Instance((TIService)_typeMocker.RegisterMockAndGetInstance(Container, typeof(TService), typeof(TIService))));
+            _mockBuilder.Build();
+            return _mockBuilder.GetTestedService();
         }
 
-        protected virtual void Prepare() { }
-
-        protected void CoupleInterfaceWithClass<TInterface, TClass>()
+        public Mock<TIService> GetTestedMockService()
         {
-            _implementationTypes.Add(typeof(TInterface), typeof(TClass));
+            _mockBuilder.Build();
+            return _mockBuilder.GetTestedMockService();
         }
 
-        protected void AddAssemblyNamePartFilter(string assemblyNamePartFilter)
+        public Mock<T> GetRelatedMock<T>() where T : class
         {
-            _typeHelpers.AssembliesNamesParts.Add(assemblyNamePartFilter);
+            _mockBuilder.Build();
+            return _mockBuilder.GetRelatedMock<T>();
         }
 
-        protected Mock<T> AddStaticOfMockToContainer<T>() where T : class
+        public void ReleaseMock<TInterface>() where TInterface : class
         {
-            var mockOfStatic = StaticMockOf<T>.Get();
-            Container.Register(Component.For<Mock<T>>().Instance(mockOfStatic));
-
-            _autoMoqSubResolver.AddRegisteredType(typeof(T));
-
-            return mockOfStatic;
+            _mockBuilder.Build();
+            _mockBuilder.GetRelatedMock<TInterface>();
         }
 
-        protected TIService GetTestedService()
+        public void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class
         {
-            var service = Container.Resolve<TIService>();
-            return service;
-        }
-
-        protected Mock<TIService> GetTestedMockService()
-        {
-            var service = Container.Resolve<Mock<TIService>>();
-            return service;
-        }
-
-        protected Mock<T> GetRelatedMock<T>()
-            where T : class
-        {
-            var mock = Container.Resolve<Mock<T>>();
-            return mock;
-        }
-
-        protected void ReleaseMock<TInterface>()
-            where TInterface : class
-        {
-            Container.Release(GetRelatedMock<TInterface>());
-        }
-
-        private void RegisterAllDependencies<TInterface, TClass>()
-            where TInterface : class
-            where TClass : class, TInterface
-        {
-            var parametersTypesToRegister =
-                _typeHelpers.GetConstructorsParametersTypes(typeof(TClass), _implementationTypes);
-
-            _autoMoqSubResolver = new AutoMoqResolver(Container.Kernel, parametersTypesToRegister);
-            Container.Kernel.Resolver.AddSubResolver(_autoMoqSubResolver);
-            _typeMocker.RegisterTypes(Container, parametersTypesToRegister, _implementationTypes);
+            _mockBuilder.Build();
+            _mockBuilder.RegisterServiceInstance(instance);
         }
 
         public void Dispose()
         {
-            Container.Dispose();
+            _mockBuilder.Dispose();
         }
+
     }
 }

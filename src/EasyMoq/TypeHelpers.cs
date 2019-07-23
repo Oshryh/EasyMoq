@@ -7,27 +7,44 @@ namespace EasyMoq
 {
     public class TypeHelpers
     {
-        public List<Type> AllRunningRelevantTypes { get; }
-        public List<string> AssembliesNamesParts { get; } = new List<string>{ "CHS" };
+        private readonly TestConfiguration _testConfiguration;
 
-        public TypeHelpers()
+        public TypeHelpers(TestConfiguration testConfiguration)
+        {
+            _testConfiguration = testConfiguration;
+        }
+
+        internal List<Type> GetAllTypesFromAssemblies(List<string> assembliesNamesParts)
         {
             var runningAssemblies = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(p => AssembliesNamesParts.Any(a=>p.FullName.Contains(a)))
+                .Where(p => assembliesNamesParts.Any(a => p.FullName.Contains(a)))
                 .ToList();
             var allAssemblies = runningAssemblies
                 .SelectMany(assembly => assembly.GetReferencedAssemblies()
-                    .Where(p => AssembliesNamesParts.Any(a => p.FullName.Contains(a)))
+                    .Where(p => assembliesNamesParts.Any(a => p.FullName.Contains(a)))
                     .Select(Assembly.Load))
                 .Union(runningAssemblies)
-                .Distinct()
                 .ToList();
 
-            AllRunningRelevantTypes = allAssemblies
-                .Where(p => AssembliesNamesParts.Any(a => p.FullName.Contains(a)))
+            var allRunningRelevantTypes = allAssemblies
+                .Where(p => assembliesNamesParts.Any(a => p.FullName.Contains(a)))
                 .SelectMany(s => s.GetTypes())
                 .Where(type => !type.IsInterface)
                 .ToList();
+
+            return allRunningRelevantTypes;
+        }
+
+        public bool TryGetSingleImplementingClassType(Type interfaceType, out Type singleInheritingClassType)
+        {
+            var inheritingClassTypes = _testConfiguration.AllRunningRelevantTypes
+                .Where(interfaceType.IsAssignableFrom).ToList();
+
+            singleInheritingClassType = inheritingClassTypes.Count == 1
+                ? inheritingClassTypes.SingleOrDefault()
+                : null;
+
+            return singleInheritingClassType == null;
         }
 
         public bool HasEmptyConstructor(Type parameterType)
@@ -44,60 +61,59 @@ namespace EasyMoq
                 .ToList();
         }
 
-        public List<Type> GetConstructorsParametersTypes(Type type, Dictionary<Type, Type> implementationTypes)
+        public List<Type> GetTypesDependencies(Type type)
         {
-            var constructorsParameters = GetConstructorsParametersTypes(type, implementationTypes, new List<Type>());
+            var dependentTypes = new List<Type>();
+            var typesToCheck = new Stack<Type>();
+            typesToCheck.Push(type);
 
-            return constructorsParameters;
+            while (typesToCheck.Any())
+            {
+                var currentType = typesToCheck.Pop();
+
+                var constructorsParametersTypes = GetAllDistinctConstructorsParametersTypes(currentType)
+                    .Where(p=>!IsChecked(p, dependentTypes)).ToList();
+
+                dependentTypes.AddRange(constructorsParametersTypes);
+
+                foreach (var parameterType in constructorsParametersTypes)
+                {
+                    if (!parameterType.IsInterface)
+                    {
+                        typesToCheck.Push(parameterType);
+                    }
+                    else if (_testConfiguration.TryGetImplementationType(parameterType, out var inheritingClass)
+                             || TryGetSingleInheritingType(parameterType, out inheritingClass))
+                    {
+                        _testConfiguration.CoupleInterfaceWithClass(parameterType, inheritingClass);
+                        typesToCheck.Push(inheritingClass);
+                    }
+                }
+
+            }
+
+            return dependentTypes;
         }
 
-        private List<Type> GetConstructorsParametersTypes(Type type, Dictionary<Type, Type> implementationTypes, List<Type> checkedTypes)
+        public bool TryGetSingleInheritingType(Type parameterType, out Type inheritingClass)
         {
-            var parametersTypes = new List<Type>(checkedTypes);
+            var inheritingClasses = _testConfiguration.AllRunningRelevantTypes.Where(parameterType.IsAssignableFrom).ToList();
 
+            inheritingClass = inheritingClasses.Count == 1 ? inheritingClasses[0] : null;
+
+            return inheritingClass == null;
+        }
+
+        private IEnumerable<Type> GetAllDistinctConstructorsParametersTypes(Type type)
+        {
             var constructorsParameters =
                 type.GetConstructors()
                     .SelectMany(GetConstructorRefParameters)
-                    .Where(p=>p != type)
+                    .Where(p => p != type)
                     .Distinct();
 
-            foreach (var parameterType in constructorsParameters)
-            {
-                if (!IsChecked(parameterType, parametersTypes))
-                {
-                    parametersTypes.Add(parameterType);
-
-                    if (!parameterType.IsInterface)
-                    {
-                        var newParameterTypes =
-                            GetConstructorsParametersTypes(parameterType, implementationTypes, parametersTypes)
-                                .Where(p => !IsChecked(p, parametersTypes));
-
-                        parametersTypes.AddRange(newParameterTypes);
-                    }
-                    else
-                    {
-                        var inheritingClasses = AllRunningRelevantTypes
-                            .Where(p => parameterType.IsAssignableFrom(p)).ToList();
-
-                        if (!implementationTypes.TryGetValue(parameterType, out var inheritingClass)
-                            && inheritingClasses.Count == 1)
-                            inheritingClass = inheritingClasses[0];
-
-                        if (inheritingClass != null)
-                        {
-                            var interfaceImplementedParameterTypes = GetConstructorsParametersTypes(inheritingClass, implementationTypes, parametersTypes)
-                                .Where(p => !IsChecked(p, parametersTypes));
-
-                                parametersTypes.AddRange(interfaceImplementedParameterTypes);
-                        }
-                    }
-                }
-            }
-
-            return parametersTypes.Distinct().ToList();
+            return constructorsParameters;
         }
-
 
         private static bool IsChecked(Type type, ICollection<Type> checkedTypes)
         {

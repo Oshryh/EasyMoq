@@ -18,7 +18,8 @@ namespace EasyMoq
             _registeredParametersTypes = new List<Type>();
         }
 
-        public void RegisterTypes(IWindsorContainer container, List<Type> parametersTypesToRegister, Dictionary<Type, Type> implementationTypes)
+        public void RegisterTypes(IWindsorContainer container, List<Type> parametersTypesToRegister,
+            IReadOnlyDictionary<Type, Type> implementationTypes)
         {
             foreach (var parameterType in parametersTypesToRegister.Where(p => p.IsInterface))
             {
@@ -42,22 +43,10 @@ namespace EasyMoq
         private Type GetInterfaceSingleImplementingClass(IReadOnlyDictionary<Type, Type> implementationTypes, Type parameterType)
         {
             if (!implementationTypes.TryGetValue(parameterType, out var inheritingClass)
-                && TryGetSingleImplementingClassType(parameterType, out var singleInheritingClassType))
+                && _typeHelpers.TryGetSingleImplementingClassType(parameterType, out var singleInheritingClassType))
                 inheritingClass = singleInheritingClassType;
 
             return inheritingClass;
-        }
-
-        private bool TryGetSingleImplementingClassType(Type interfaceType, out Type singleInheritingClassType)
-        {
-            var inheritingClassTypes = _typeHelpers.AllRunningRelevantTypes
-                .Where(interfaceType.IsAssignableFrom).ToList();
-
-            singleInheritingClassType = inheritingClassTypes.Count == 1
-                ? inheritingClassTypes.SingleOrDefault()
-                : null;
-
-            return singleInheritingClassType == null;
         }
 
         private object RegisterTypeInstance(IWindsorContainer container, Type parameterType)

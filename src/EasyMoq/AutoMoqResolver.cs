@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Castle.Core;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Context;
@@ -10,17 +11,22 @@ namespace EasyMoq
     public class AutoMoqResolver : ISubDependencyResolver
     {
         private readonly IKernel _kernel;
-        private readonly IList<Type> _registeredTypes;
+        private readonly List<Type> _registeredTypes = new List<Type>();
 
-        public AutoMoqResolver(IKernel kernel, IList<Type> constructorsParameters)
+        public AutoMoqResolver(IKernel kernel)
         {
             _kernel = kernel;
-            _registeredTypes = constructorsParameters;
         }
 
         public void AddRegisteredType(Type type)
         {
-            _registeredTypes.Add(type);
+            if (!_registeredTypes.Contains(type))
+                _registeredTypes.Add(type);
+        }
+
+        public void AddRegisteredTypeRange(IEnumerable<Type> types)
+        {
+            types.ToList().ForEach(AddRegisteredType);
         }
 
         public void AddRegisteredType<T>() where T : Type
