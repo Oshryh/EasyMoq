@@ -16,6 +16,11 @@ namespace EasyMoq
 
         public TestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
 
+        public void ReBuild()
+        {
+            _mockBuilder.Build(true);
+        }
+
         public TIService GetTestedService()
         {
             _mockBuilder.Build();
