@@ -43,6 +43,9 @@ namespace EasyMoq
             _autoMoqSubResolver.AddRegisteredTypeRange(parametersTypesToRegister);
             _typeMocker.RegisterTypes(_mockBuilderContainer, parametersTypesToRegister, TestConfiguration.GetImplementationTypes());
 
+            foreach (var type in TestConfiguration.GetTypesToBeMockedAsStatic())
+                AddStaticOfMockToContainer(type);
+
             _mockBuilderContainer.Register(
                 Component.For<TIService>()
                     .Instance((TIService)_typeMocker.RegisterMockAndGetInstance(_mockBuilderContainer, typeof(TService), typeof(TIService))));
@@ -94,14 +97,12 @@ namespace EasyMoq
             }
         }
 
-        public Mock<T> AddStaticOfMockToContainer<T>() where T : class
+        private void AddStaticOfMockToContainer(Type type)
         {
-            var mockOfStatic = StaticMockOf<T>.Instance;
-            _mockBuilderContainer.Register(Component.For<Mock<T>>().Instance(mockOfStatic));
+            _mockBuilderContainer.Register(Component.For(typeof(Mock<>).MakeGenericType(type))
+                .Instance(_typeMocker.GetInstanceOfMockOfStaticOf(type)));
 
-            _autoMoqSubResolver.AddRegisteredType(typeof(T));
-
-            return mockOfStatic;
+            _autoMoqSubResolver.AddRegisteredType(type);
         }
 
         public TIService GetTestedService()

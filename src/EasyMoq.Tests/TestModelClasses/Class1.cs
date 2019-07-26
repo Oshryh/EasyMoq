@@ -1,4 +1,6 @@
-﻿namespace EasyMoq.Tests.TestModelClasses
+﻿using EasyMoq.Tests.TestModelClasses.ForStaticClassesTests;
+
+namespace EasyMoq.Tests.TestModelClasses
 {
     public class Class1 : Interface1
     {
@@ -17,5 +19,14 @@
             return Method1();
         }
 
+        public virtual string Method4CallingStaticConfigKey1()
+        {
+            return ConfigurationManager.GetSettingsValue("Key1");
+        }
+
+        public virtual string Method5CallingStaticConfigKey2()
+        {
+            return ConfigurationManager.AppSettings["Key2"];
+        }
     }
 }

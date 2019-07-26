@@ -85,6 +85,16 @@ namespace EasyMoq
             return ((Mock)newMockInstance).Object;
         }
 
+        public object GetInstanceOfMockOfStaticOf(Type type)
+        {
+            var rawGenericType = typeof(StaticMockOf<>);
+            var genericTypeOfType = rawGenericType.MakeGenericType(type);
+            var instancePropertyOfStaticClass = genericTypeOfType.GetProperty("Instance");
+            var getMethodOfInstanceProperty = instancePropertyOfStaticClass.GetGetMethod();
+            var mockOfStatic = getMethodOfInstanceProperty.Invoke(genericTypeOfType, null);
+            return mockOfStatic;
+        }
+
         private object[] ConstructorParametersInstancesArray(IWindsorContainer container, Type parameterType)
         {
             var constructorsParametersTypes = parameterType.GetConstructors()
