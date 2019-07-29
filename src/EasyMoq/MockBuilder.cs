@@ -19,8 +19,6 @@ namespace EasyMoq
         private TypeHelpers _typeHelpers;
         private TypeMocker _typeMocker;
 
-        private readonly object _testConfigurationLock = new object();
-
         public MockBuilder()
         {
             InitializeNewMockBuilder();
