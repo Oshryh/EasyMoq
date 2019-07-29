@@ -1,5 +1,15 @@
 # EasyMoq
 
+This tiny, simple to use, and very configurable tool, which helps write tests for well structured code, as well as imperfect code.
+
+EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
+
+Advantages/features:
+- Saves many lines of code.
+- Makes tests more flexible and durable (since there's no need to fix all the tests when a something like ILogger or IMonitor is added to some constructor) and makes life easier.
+- Enables you to test imperfect code by defaultively leaving the original functionality accessible (examples will be added, for now see tests)
+- Can couple an inteface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
+
 ## Examples
 
 #### Example 1
@@ -107,7 +117,8 @@ public class Class3Test
 }
 ```
 
-So, in this example we had only 1 class/interface in each constructor, but many times we have 10 or 20, especially when using IOC. 
-This tiny, simple to use, and very configurable tool, saves many lines of code, make your tests more flexable and durable (cause you don't have to fix all the tests becuase you just added a ILogger or IMonitor to some constructor) amd makes life easier.
+So, in this example we had only 1 class/interface in each constructor, but many times we have 10 or 20, especially when using IOC, and this tool saves a lot of code, which later also needs to be maintained.
 
-## More examples and documentation will come soon :) 
+
+
+## More examples and documentation will come soon :)
