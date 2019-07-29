@@ -1,6 +1,8 @@
 # EasyMoq
 
 ## Examples
+
+#### Example 1
 If we have the following classes and interfaces:
 ```csharp
 public interface IInterface1
@@ -75,7 +77,7 @@ public class Class3Test
 }
 ```
 
-### But instead, with this framework it will be 1 of two options:
+**But instead, with this framework it will be 1 of two options:**
 1)
 ```csharp
 public class Class3Test : BaseServiceTest<IInterface3, Class3>
