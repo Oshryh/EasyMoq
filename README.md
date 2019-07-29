@@ -75,7 +75,7 @@ public class Class3Test
 }
 ```
 
-###But instead, with this framework it will be 1 of two options:
+### But instead, with this framework it will be 1 of two options:
 1)
 ```csharp
 public class Class3Test : BaseServiceTest<IInterface3, Class3>
@@ -107,4 +107,4 @@ public class Class3Test
 So, in this example we had only 1 class/interface in each constructor, but many times we have 10 or 20, especially when using IOC. 
 This tiny, simple to use, and very configurable tool, saves many lines of code, make your tests more flexable and durable (cause you don't have to fix all the tests becuase you just added a ILogger or IMonitor to some constructor) amd makes life easier.
 
-##More examples and documentation will come soon :) 
+## More examples and documentation will come soon :) 
