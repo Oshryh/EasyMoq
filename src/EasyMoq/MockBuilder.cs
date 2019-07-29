@@ -26,6 +26,12 @@ namespace EasyMoq
             InitializeNewMockBuilder();
         }
 
+        public MockBuilder(bool build) : this()
+        {
+            if (build)
+                Build();
+        }
+
         public void Build(bool forceRebuild = false)
         {
             if (_built && !forceRebuild) return;
