@@ -4,7 +4,7 @@ using Xunit;
 
 namespace EasyMoq.Tests
 {
-    public class RelatedMockTests : BaseServiceTest<Interface2, Class2>
+    public class RelatedMockTests : BaseServiceTest<IInterface2, Class2>
     {
         [Fact]
         public void TestedService_TestOriginalClassMethodCalling()
@@ -43,7 +43,7 @@ namespace EasyMoq.Tests
             const string testValue = "MockTest";
             var testedService = GetTestedService();
 
-            GetRelatedMock<Interface3>().Setup(x => x.Method1()).Returns(testValue);
+            GetRelatedMock<IInterface3>().Setup(x => x.Method1()).Returns(testValue);
 
             var result = testedService.UsingClass3Method1();
 

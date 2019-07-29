@@ -6,7 +6,7 @@ using Xunit;
 
 namespace EasyMoq.Tests
 {
-    public class TestedMockOfStaticFunctionality : BaseServiceTest<Interface1, Class1>
+    public class TestedMockOfStaticFunctionality : BaseServiceTest<IInterface1, Class1>
     {
         [Fact]
         public void TestedService_TestMockedClassMethodCalling()

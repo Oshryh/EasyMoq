@@ -1,6 +1,6 @@
 ﻿namespace EasyMoq.Tests.TestModelClasses
 {
-    public class Class3 : Interface3
+    public class Class3 : IInterface3
     {
         public virtual string Method1()
         {

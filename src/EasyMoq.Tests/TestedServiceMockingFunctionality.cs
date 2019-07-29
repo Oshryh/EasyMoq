@@ -4,7 +4,7 @@ using Xunit;
 
 namespace EasyMoq.Tests
 {
-    public class TestedServiceMockingFunctionality : BaseServiceTest<Interface1, Class1>
+    public class TestedServiceMockingFunctionality : BaseServiceTest<IInterface1, Class1>
     {
         [Fact]
         public void TestedService_TestOriginalMethodCalling()

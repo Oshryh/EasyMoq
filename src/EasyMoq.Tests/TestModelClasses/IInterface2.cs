@@ -1,6 +1,6 @@
 ﻿namespace EasyMoq.Tests.TestModelClasses
 {
-    public interface Interface2
+    public interface IInterface2
     {
         string UsingClass1Method1();
         string UsingClass1Method3CallingMethod1();

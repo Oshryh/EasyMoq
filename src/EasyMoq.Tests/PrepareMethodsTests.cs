@@ -1,10 +1,11 @@
 using EasyMoq.Tests.TestModelClasses;
 using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace EasyMoq.Tests
 {
-    public class PrepareMethodsTests : BaseServiceTest<Interface2, Class2>
+    public class PrepareMethodsTests : BaseServiceTest<IInterface2, Class2>
     {
         [Fact]
         public void CoupleInterfaceWithClass_TestDependentNonCoupledInterfaceUnMockedMethodCalling()
@@ -22,7 +23,7 @@ namespace EasyMoq.Tests
             result.Should().BeNull();
 
             // Configuration change
-            TestConfiguration.CoupleInterfaceWithClass<Interface3, Class3>();
+            TestConfiguration.CoupleInterfaceWithClass<IInterface3, Class3>();
             // Rebuilding the mock objects
             ReBuild();
 
@@ -60,7 +61,7 @@ namespace EasyMoq.Tests
         {
             var expectedResult = $"{nameof(Class3)}.MockedMethod";
 
-            GetRelatedMock<Interface3>().Setup(x => x.Method1()).Returns(expectedResult);
+            GetRelatedMock<IInterface3>().Setup(x => x.Method1()).Returns(expectedResult);
             var result = GetTestedService().UsingClass3Method1();
 
             // After coupling the interface Interface3 with the class Class3, when calling an un-mocked method on the mocked
