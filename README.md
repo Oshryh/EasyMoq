@@ -78,6 +78,7 @@ public class Class3Test
 ```
 
 **But instead, with this framework it will be 1 of two options:**
+
 1)
 ```csharp
 public class Class3Test : BaseServiceTest<IInterface3, Class3>
