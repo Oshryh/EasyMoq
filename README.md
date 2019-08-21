@@ -1,6 +1,8 @@
 # EasyMoq
 
-This tiny, simple to use, and very configurable tool, which helps write tests for well structured code, as well as imperfect code.
+#### I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)
+
+This tiny, simple to use, and very configurable tool, helps writing unit-tests and integration tests for well structured code, as well as imperfect code, which is based on ICO (dependencies are passed in the constructors).
 
 EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
 
@@ -8,7 +10,9 @@ Advantages/features:
 - Saves many lines of code.
 - Makes tests more flexible and durable (since there's no need to fix all the tests when a something like ILogger or IMonitor is added to some constructor) and makes life easier.
 - Enables you to test imperfect code by defaultively leaving the original functionality accessible (examples will be added, for now see tests)
-- Can couple an inteface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
+- Can couple an interface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
+- Dprovides a solution for mocking static dependencies with minimal code change. (will add an example of how to implement soon)
+- **(NEW!!!)** Added the IntegrationTestMockBuilder class which takes a container, and specific classes/interfaces to mock, and mocks only requested classes/interfaces, while using the normal behaviour of rest of the dependencies. This is intended for usage in integration tests, where we sometimes want to mock just one method which get changing data from the DB or calls an unreliable third party, but still test the rest of the process. *See examples 2 and 3* :)
 
 ## Examples
 
@@ -120,4 +124,137 @@ So, in this example we had only 1 class/interface in each constructor, but many 
 
 
 
-## More examples and documentation will come soon :)
+#### Example 2 - IntegrationTestMock - One method mocked and one running normally in the same class
+If we have the following classes and interfaces:
+```csharp
+    public interface IExternalSupplierClass
+    {
+        string GetDataFromUnreliableSupplier();
+    }
+
+    class ExternalSupplierClass : IExternalSupplierClass
+    {
+        public string GetDataFromUnreliableSupplier()
+        {
+            return "Get data from unreliable supplier.";
+        }
+    }
+
+    public class DbProviderClass
+    {
+        public string GetOtherDataFromDb()
+        {
+            return "Other data from DB";
+        }
+
+        public string GetDataFromDb()
+        {
+            return "Data from DB";
+        }
+    }
+
+    public interface IInternalLogicClass
+    {
+        string GetInfoFromExternalSupplierAndDb();
+    }
+
+    class InternalLogicClass : IInternalLogicClass
+    {
+        private readonly IExternalSupplierClass _externalSupplier;
+        private readonly DbProviderClass _dbProvider;
+
+        public InternalLogicClass(IExternalSupplierClass externalSupplier, DbProviderClass dbProvider)
+        {
+            _externalSupplier = externalSupplier;
+            _dbProvider = dbProvider;
+        }
+
+        public string GetInfoFromExternalSupplierAndDb()
+        {
+            return _externalSupplier.GetDataFromUnreliableSupplier() + _dbProvider.GetDataFromDb();
+        }
+    }
+
+    public interface ITestIntegrationApp
+    {
+        string DoStuffWithServices();
+    }
+
+    public class TestIntegrationApp : ITestIntegrationApp
+    {
+        private readonly DbProviderClass _dbProvider;
+        private readonly IInternalLogicClass _internalLogic;
+
+        public TestIntegrationApp(DbProviderClass dbProvider, IInternalLogicClass internalLogic)
+        {
+            _dbProvider = dbProvider;
+            _internalLogic = internalLogic;
+        }
+
+        public string DoStuffWithServices()
+        {
+            return _internalLogic.GetInfoFromExternalSupplierAndDb()
+                   + _dbProvider.GetOtherDataFromDb();
+        }
+    }
+```
+And we have the following installer:
+```csharp
+using Castle.MicroKernel.Registration;
+using Castle.MicroKernel.SubSystems.Configuration;
+using Castle.Windsor;
+
+namespace EasyMoq.Examples.Example2_IntegrationTestMock_OneMethodMockedAnd1RunningNormally
+{
+    public class Installer : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(
+                Component.For<DbProviderClass>(),
+                Component.For<IExternalSupplierClass>().ImplementedBy<ExternalSupplierClass>(),
+                Component.For<IInternalLogicClass>().ImplementedBy<InternalLogicClass>(),
+                Component.For<ITestIntegrationApp>().ImplementedBy<TestIntegrationApp>()
+            );
+        }
+    }
+} 
+
+```
+We can do the following, and it works perfectly:
+```csharp
+using Castle.Windsor;
+using FluentAssertions;
+using Xunit;
+
+namespace EasyMoq.Examples.Example2_IntegrationTestMock_OneMethodMockedAnd1RunningNormally
+{
+    public class IntegrationTestMockBuilderTests
+    {
+        [Fact]
+        public void Test1()
+        {
+            var container = new WindsorContainer().Install(new Installer());
+
+            var integrationTestMockBuilder = new IntegrationTestMockBuilder<ITestIntegrationApp, TestIntegrationApp>(container,
+                typeof(IExternalSupplierClass));
+
+            var mockDataFromSupplier = "Mock data from supplier";
+
+            integrationTestMockBuilder.GetRelatedMock<IExternalSupplierClass>()
+                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+
+            var expectedResult = mockDataFromSupplier + "Data from DB" + "Other data from DB";
+
+            var result = integrationTestMockBuilder.GetTestedService().DoStuffWithServices();
+            result.Should().Be(expectedResult);
+        }
+    }
+}
+
+```
+
+WOW!!! AMAZING :P
+
+But seriously, this is a really nice addition, and for me it made integration tests so much easier to write (with removing changing/unreliable factors) ... I recommend it whole heartedly! ^_^
+
