@@ -123,7 +123,14 @@ namespace EasyMoq
 
         private object GetRegisterTypeInstance(Type parameterType)
         {
-            return ((Mock)_container.Resolve(_typeOfGenericMock.MakeGenericType(parameterType))).Object;
+            var desiredMock = _typeOfGenericMock.MakeGenericType(parameterType);
+
+            if (_mockStrategy == MockStrategy.UnitTest)
+                return ((Mock) _container.Resolve(desiredMock)).Object;
+            else
+                return _container.Kernel.HasComponent(desiredMock)
+                    ? ((Mock) _container.Resolve(desiredMock)).Object
+                    : _container.Resolve(parameterType);
         }
 
         private object[] ConstructorParametersInstancesArray(Type parameterType)
