@@ -13,6 +13,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <DocumentationFile>C:\D\GR\Private\EasyMoq\src\EasyMoq\EasyMoq.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Castle.Windsor" Version="5.0.0" />
     <PackageReference Include="Moq" Version="4.12.0" />
