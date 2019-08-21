@@ -1,4 +1,4 @@
-# EasyMoq
+# EasyMoq  [![Build status](https://ci.appveyor.com/api/projects/status/km7el3evvelhtl6f/branch/master?svg=true)](https://ci.appveyor.com/project/OshryHorn/easymoq/branch/master)
 
 #### I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)
 
@@ -11,7 +11,7 @@ Advantages/features:
 - Makes tests more flexible and durable (since there's no need to fix all the tests when a something like ILogger or IMonitor is added to some constructor) and makes life easier.
 - Enables you to test imperfect code by defaultively leaving the original functionality accessible (examples will be added, for now see tests)
 - Can couple an interface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
-- Dprovides a solution for mocking static dependencies with minimal code change. (will add an example of how to implement soon)
+- Provides a solution for mocking static dependencies with minimal code change. (will add an example of how to implement soon)
 - **(NEW!!!)** Added the IntegrationTestMockBuilder class which takes a container, and specific classes/interfaces to mock, and mocks only requested classes/interfaces, while using the normal behaviour of rest of the dependencies. This is intended for usage in integration tests, where we sometimes want to mock just one method which get changing data from the DB or calls an unreliable third party, but still test the rest of the process. *See examples 2 and 3* :)
 
 ## Examples
