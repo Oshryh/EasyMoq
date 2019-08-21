@@ -12,7 +12,7 @@
             return $"{nameof(Class3)}.{nameof(Method2)}";
         }
 
-        public virtual string Method3CallingMethod1()
+        public virtual string Method3_CallingMethod1()
         {
             return Method1();
         }

@@ -10,7 +10,7 @@ namespace EasyMoq.Tests
         [Fact]
         public void CoupleInterfaceWithClass_TestDependentNonCoupledInterfaceUnMockedMethodCalling()
         {
-            var result = GetTestedService().UsingClass3Method1();
+            var result = GetTestedService().Method3_UsingClass3Method1();
 
             result.Should().BeNull();
         }
@@ -18,7 +18,7 @@ namespace EasyMoq.Tests
         [Fact]
         public void CoupleInterfaceWithClass_TestRebuildCoupledInterfaceUnMockedMethodCalling()
         {
-            var result = GetTestedService().UsingClass3Method1();
+            var result = GetTestedService().Method3_UsingClass3Method1();
 
             result.Should().BeNull();
 
@@ -27,7 +27,7 @@ namespace EasyMoq.Tests
             // Rebuilding the mock objects
 
             var expectedResult = $"{nameof(Class3)}.Method1";
-            result = GetTestedService().UsingClass3Method1();
+            result = GetTestedService().Method3_UsingClass3Method1();
 
             // After coupling the interface Interface3 with the class Class3, when calling an un-mocked method on the mocked
             // interface, it should run implemented method in the coupled inheriting class. 
@@ -37,7 +37,7 @@ namespace EasyMoq.Tests
         [Fact]
         public void CoupleInterfaceWithClassFromAssemblies_TestRebuildCoupledInterfaceUnMockedMethodCalling()
         {
-            var result = GetTestedService().UsingClass3Method1();
+            var result = GetTestedService().Method3_UsingClass3Method1();
             result.Should().BeNull();
 
             // Configuration change
@@ -47,7 +47,7 @@ namespace EasyMoq.Tests
             // Rebuilding the mock objects
 
             var expectedResult = $"{nameof(Class3)}.Method1";
-            result = GetTestedService().UsingClass3Method1();
+            result = GetTestedService().Method3_UsingClass3Method1();
 
             // After coupling the interface Interface3 with the class Class3, when calling an un-mocked method on the mocked
             // interface, it should run implemented method in the coupled inheriting class. 
@@ -60,7 +60,7 @@ namespace EasyMoq.Tests
             var expectedResult = $"{nameof(Class3)}.MockedMethod";
 
             GetRelatedMock<IInterface3>().Setup(x => x.Method1()).Returns(expectedResult);
-            var result = GetTestedService().UsingClass3Method1();
+            var result = GetTestedService().Method3_UsingClass3Method1();
 
             // After coupling the interface Interface3 with the class Class3, when calling an un-mocked method on the mocked
             // interface, it should run implemented method in the coupled inheriting class. 

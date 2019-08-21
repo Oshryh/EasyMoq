@@ -4,8 +4,8 @@
     {
         string Method1();
         string Method2();
-        string Method3CallingMethod1();
-        string Method4CallingStaticConfigKey1();
-        string Method5CallingStaticConfigKey2();
+        string Method3_CallingMethod1();
+        string Method4_CallingStaticConfigKey1();
+        string Method5_CallingStaticConfigKey2();
     }
 }

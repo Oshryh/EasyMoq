@@ -14,17 +14,17 @@ namespace EasyMoq.Tests.TestModelClasses
             return $"{nameof(Class1)}.{nameof(Method2)}";
         }
 
-        public virtual string Method3CallingMethod1()
+        public virtual string Method3_CallingMethod1()
         {
             return Method1();
         }
 
-        public virtual string Method4CallingStaticConfigKey1()
+        public virtual string Method4_CallingStaticConfigKey1()
         {
             return ConfigurationManager.GetSettingsValue("Key1");
         }
 
-        public virtual string Method5CallingStaticConfigKey2()
+        public virtual string Method5_CallingStaticConfigKey2()
         {
             return ConfigurationManager.AppSettings["Key2"];
         }

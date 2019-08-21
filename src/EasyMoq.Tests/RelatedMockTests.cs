@@ -9,7 +9,7 @@ namespace EasyMoq.Tests
         [Fact]
         public void TestedService_TestOriginalClassMethodCalling()
         {
-            var result = GetTestedService().UsingClass1Method1();
+            var result = GetTestedService().Method1_UsingClass1Method1();
 
             result.Should().Be($"{nameof(Class1)}.Method1");
         }
@@ -22,7 +22,7 @@ namespace EasyMoq.Tests
 
             GetRelatedMock<Class1>().Setup(x => x.Method1()).Returns(testValue);
 
-            var result = testedService.UsingClass1Method1();
+            var result = testedService.Method1_UsingClass1Method1();
 
             result.Should().Be(testValue);
         }
@@ -30,7 +30,7 @@ namespace EasyMoq.Tests
         [Fact]
         public void TestedService_TestOriginalInterfaceMethodCalling()
         {
-            var result = GetTestedService().UsingClass3Method1();
+            var result = GetTestedService().Method3_UsingClass3Method1();
 
             // When calling an un-mocked method on a mocked interface, it should not run, and return the default (string -> null).
             // This will change when using CoupleInterfaceWithClass() in the Prepare() method. Will be tested separately. 
@@ -45,7 +45,7 @@ namespace EasyMoq.Tests
 
             GetRelatedMock<IInterface3>().Setup(x => x.Method1()).Returns(testValue);
 
-            var result = testedService.UsingClass3Method1();
+            var result = testedService.Method3_UsingClass3Method1();
 
             result.Should().Be(testValue);
         }

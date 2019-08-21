@@ -11,24 +11,24 @@
             _class3 = class3;
         }
 
-        public string UsingClass1Method1()
+        public string Method1_UsingClass1Method1()
         {
             return _class1.Method1();
         }
 
-        public string UsingClass1Method3CallingMethod1()
+        public string Method2_UsingClass1Method3CallingMethod1()
         {
-            return _class1.Method3CallingMethod1();
+            return _class1.Method3_CallingMethod1();
         }
 
-        public string UsingClass3Method1()
+        public string Method3_UsingClass3Method1()
         {
             return _class3.Method1();
         }
 
-        public string UsingClass3Method3CallingMethod1()
+        public string Method4_UsingClass3Method3CallingMethod1()
         {
-            return _class3.Method3CallingMethod1();
+            return _class3.Method3_CallingMethod1();
         }
     }
 }

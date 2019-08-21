@@ -4,6 +4,6 @@
     {
         string Method1();
         string Method2();
-        string Method3CallingMethod1();
+        string Method3_CallingMethod1();
     }
 }

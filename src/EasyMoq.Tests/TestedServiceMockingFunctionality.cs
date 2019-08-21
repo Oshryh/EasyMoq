@@ -38,7 +38,7 @@ namespace EasyMoq.Tests
 
             GetTestedMockService().Setup(x => x.Method1()).Returns(testValue);
 
-            var result = GetTestedMockService().Object.Method3CallingMethod1();
+            var result = GetTestedMockService().Object.Method3_CallingMethod1();
 
             result.Should().Be(testValue);
 

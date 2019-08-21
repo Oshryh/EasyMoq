@@ -16,10 +16,11 @@ namespace EasyMoq.Tests
             TestConfiguration.AddTypeToBeMockedAsStatic(typeof(IDatabaseSettings));
 
             var mockedDatabaseSettings = GetRelatedMock<IDatabaseSettings>();
-            mockedDatabaseSettings.Setup(x => x.GetSettingsValue("Key1")).Returns(()=>expectedResult);
+            mockedDatabaseSettings.Setup(x => x.GetSettingsValue("Key1")).Returns(() => expectedResult);
+
             ConfigurationManager.WithDatabaseSettings(mockedDatabaseSettings.Object);
 
-            var result = GetTestedService().Method4CallingStaticConfigKey1();
+            var result = GetTestedService().Method4_CallingStaticConfigKey1();
 
             result.Should().Be(expectedResult);
         }
@@ -31,7 +32,7 @@ namespace EasyMoq.Tests
             TestConfiguration.AddTypeToBeMockedAsStatic(typeof(IDatabaseSettings));
             ConfigurationManager.WithDatabaseSettings(GetRelatedMock<IDatabaseSettings>().Object);
 
-            var result = GetTestedService().Method5CallingStaticConfigKey2();
+            var result = GetTestedService().Method5_CallingStaticConfigKey2();
 
             result.Should().BeNull();
         }
