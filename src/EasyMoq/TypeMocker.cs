@@ -11,78 +11,95 @@ namespace EasyMoq
     {
         private readonly TypeHelpers _typeHelpers;
         private readonly List<Type> _registeredParametersTypes;
+        private readonly IWindsorContainer _container;
+        private readonly Type _typeOfGenericMock;
+        private readonly MockStrategy _mockStrategy;
 
-        public TypeMocker(TypeHelpers typeHelpers)
+        public TypeMocker(IWindsorContainer container, TypeHelpers typeHelpers, MockStrategy mockStrategy)
         {
+            _container = container;
             _typeHelpers = typeHelpers;
+            _mockStrategy = mockStrategy;
+
             _registeredParametersTypes = new List<Type>();
+            _typeOfGenericMock = typeof(Mock<>);
         }
 
-        public void RegisterTypes(IWindsorContainer container, List<Type> parametersTypesToRegister,
-            IReadOnlyDictionary<Type, Type> implementationTypes)
+        public void RegisterTypes(List<Type> parametersTypesToRegister, IReadOnlyDictionary<Type, Type> implementationTypes)
         {
-            foreach (var parameterType in parametersTypesToRegister.Where(p => p.IsInterface))
+            parametersTypesToRegister.ForEach(parameterType => RegisterType(implementationTypes, parameterType));
+        }
+
+        public void RegisterMockWithInstanceFactory(Type parameterType)
+        {
+            RegisterMockWithInstanceFactory(parameterType, parameterType);
+        }
+
+        public void RegisterMockWithInstanceFactory(Type parameterType, Type parameterInterfaceType)
+        {
+            if (IsRegistered(parameterType, parameterInterfaceType))
+                return;
+
+            var mockedInterfaceType = _typeOfGenericMock.MakeGenericType(parameterInterfaceType);
+
+            var mockedType = parameterInterfaceType != parameterType
+                ? _typeOfGenericMock.MakeGenericType(parameterType)
+                : mockedInterfaceType;
+
+            _container.Register(Component.For(mockedInterfaceType).UsingFactoryMethod(_ =>
             {
-                var inheritingClass = GetInterfaceSingleImplementingClass(implementationTypes, parameterType);
+                var constructorParametersInstances = ConstructorParametersInstancesArray(parameterType);
+                var newMockInstance = Activator.CreateInstance(mockedType, constructorParametersInstances);
 
-                if (!_registeredParametersTypes.Contains(parameterType))
+                if (parameterInterfaceType != parameterType)
                 {
-                    _registeredParametersTypes.Add(parameterType);
-
-                    if (inheritingClass != null && inheritingClass != parameterType)
-                        RegisterMockAndGetInstance(container, inheritingClass, parameterType);
-                    else
-                        container.Register(Component.For(typeof(Mock<>).MakeGenericType(parameterType)));
+                    newMockInstance = _typeOfGenericMock.GetMethod(nameof(Mock.As))
+                        .MakeGenericMethod(parameterInterfaceType)
+                        .Invoke(newMockInstance, new object[0]);
                 }
-            }
 
-            foreach (var parameterType in parametersTypesToRegister)
-                RegisterTypeInstance(container, parameterType);
-        }
-
-        private Type GetInterfaceSingleImplementingClass(IReadOnlyDictionary<Type, Type> implementationTypes, Type parameterType)
-        {
-            if (!implementationTypes.TryGetValue(parameterType, out var inheritingClass)
-                && _typeHelpers.TryGetSingleImplementingClassType(parameterType, out var singleInheritingClassType))
-                inheritingClass = singleInheritingClassType;
-
-            return inheritingClass;
-        }
-
-        private object RegisterTypeInstance(IWindsorContainer container, Type parameterType)
-        {
-            if (_registeredParametersTypes.Contains(parameterType))
-                return ((Mock)container.Resolve(typeof(Mock<>).MakeGenericType(parameterType))).Object;
+                ((Mock) newMockInstance).CallBase = true;
+                return newMockInstance;
+            }));
 
             _registeredParametersTypes.Add(parameterType);
-
-            return RegisterMockAndGetInstance(container, parameterType);
         }
 
-        public object RegisterMockAndGetInstance(IWindsorContainer container, Type parameterType)
+        private void RegisterType(IReadOnlyDictionary<Type, Type> implementationTypes, Type parameterType)
         {
-            return RegisterMockAndGetInstance(container, parameterType, parameterType);
+            if (parameterType.IsInterface)
+                RegisterMockInterfaceWithImplementationIfFound(parameterType, implementationTypes);
+            else
+                RegisterMockWithInstanceFactory(parameterType);
         }
 
-        public object RegisterMockAndGetInstance(IWindsorContainer container, Type parameterType, Type parameterInterfaceType)
+        private void RegisterMockInterfaceWithImplementationIfFound(Type parameterType, IReadOnlyDictionary<Type, Type> implementationTypes)
         {
-            var constructorParametersInstances = ConstructorParametersInstancesArray(container, parameterType);
+            var inheritingClass = GetInterfaceSingleImplementingClass(implementationTypes, parameterType);
 
-            var mockedType = typeof(Mock<>).MakeGenericType(parameterType);
-            var newMockInstance = Activator.CreateInstance(mockedType, constructorParametersInstances);
-            var mockedInterfaceType = typeof(Mock<>).MakeGenericType(parameterInterfaceType);
+            if (inheritingClass != null && inheritingClass != parameterType)
+                RegisterMockWithInstanceFactory(inheritingClass, parameterType);
+            else
+                RegisterMockInterface(parameterType);
+        }
 
-            if (parameterInterfaceType != parameterType)
-            {
-                newMockInstance = typeof(Mock<>).GetMethod(nameof(Mock.As))
-                    .MakeGenericMethod(parameterInterfaceType)
-                    .Invoke(newMockInstance, new object[0]);
-            }
+        private void RegisterMockInterface(Type parameterType)
+        {
+            if (IsRegistered(parameterType))
+                return;
 
-            ((Mock)newMockInstance).CallBase = true;
-            container.Register(Component.For(mockedInterfaceType).Instance(newMockInstance));
+            _container.Register(Component.For(_typeOfGenericMock.MakeGenericType(parameterType)));
+            _registeredParametersTypes.Add(parameterType);
+        }
 
-            return ((Mock)newMockInstance).Object;
+        private bool IsRegistered(Type parameterType, Type parameterInterfaceType)
+        {
+            return IsRegistered(parameterType) || IsRegistered(parameterInterfaceType);
+        }
+
+        private bool IsRegistered(Type parameterType)
+        {
+            return _registeredParametersTypes.Contains(parameterType);
         }
 
         public object GetInstanceOfMockOfStaticOf(Type type)
@@ -95,7 +112,21 @@ namespace EasyMoq
             return mockOfStatic;
         }
 
-        private object[] ConstructorParametersInstancesArray(IWindsorContainer container, Type parameterType)
+        private Type GetInterfaceSingleImplementingClass(IReadOnlyDictionary<Type, Type> implementationTypes, Type parameterType)
+        {
+            if (!implementationTypes.TryGetValue(parameterType, out var inheritingClass)
+                && _typeHelpers.TryGetSingleImplementingClassType(parameterType, out var singleInheritingClassType))
+                inheritingClass = singleInheritingClassType;
+
+            return inheritingClass;
+        }
+
+        private object GetRegisterTypeInstance(Type parameterType)
+        {
+            return ((Mock)_container.Resolve(_typeOfGenericMock.MakeGenericType(parameterType))).Object;
+        }
+
+        private object[] ConstructorParametersInstancesArray(Type parameterType)
         {
             var constructorsParametersTypes = parameterType.GetConstructors()
                 .Select(c => _typeHelpers.GetConstructorRefParameters(c))
@@ -104,10 +135,8 @@ namespace EasyMoq
 
             if (constructorsParametersTypes.Any())
             {
-                var constructorParametersTypes = constructorsParametersTypes.OrderByDescending(p => p.Count).FirstOrDefault();
-
-                var constructorParametersInstances = constructorParametersTypes
-                    .Select(p => RegisterTypeInstance(container, p));
+                var constructorParametersTypes = constructorsParametersTypes.OrderByDescending(p => p.Count).First();
+                var constructorParametersInstances = constructorParametersTypes.Select(GetRegisterTypeInstance);
 
                 return constructorParametersInstances.ToArray();
             }
