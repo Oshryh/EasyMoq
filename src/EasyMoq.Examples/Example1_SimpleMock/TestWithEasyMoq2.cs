@@ -8,7 +8,7 @@ namespace EasyMoq.Examples.Example1_SimpleMock
         [Fact]
         public void Test()
         {
-            var mockBuilder = new MockBuilder<IInterface3, Class3>(true);
+            var mockBuilder = new MockBuilder<IInterface3, Class3>();
             mockBuilder.GetRelatedMock<IInterface1>().Setup(x => x.Method1()).Returns("+test");
 
             var testResult = mockBuilder.GetTestedService().UsingClass2Method1();

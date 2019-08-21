@@ -16,38 +16,28 @@ namespace EasyMoq
 
         public TestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
 
-        public void ReBuild()
-        {
-            _mockBuilder.Build(true);
-        }
-
         public TIService GetTestedService()
         {
-            _mockBuilder.Build();
             return _mockBuilder.GetTestedService();
         }
 
         public Mock<TIService> GetTestedMockService()
         {
-            _mockBuilder.Build();
             return _mockBuilder.GetTestedMockService();
         }
 
         public Mock<T> GetRelatedMock<T>() where T : class
         {
-            _mockBuilder.Build();
             return _mockBuilder.GetRelatedMock<T>();
         }
 
         public void ReleaseMock<TInterface>() where TInterface : class
         {
-            _mockBuilder.Build();
             _mockBuilder.GetRelatedMock<TInterface>();
         }
 
         public void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class
         {
-            _mockBuilder.Build();
             _mockBuilder.RegisterServiceInstance(instance);
         }
 

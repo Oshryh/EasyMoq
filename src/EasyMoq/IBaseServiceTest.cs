@@ -9,7 +9,6 @@ namespace EasyMoq
     public interface IBaseServiceTest<TIService>
         where TIService : class
     {
-        void ReBuild();
         TIService GetTestedService();
         Mock<TIService> GetTestedMockService();
         Mock<T> GetRelatedMock<T>() where T : class;

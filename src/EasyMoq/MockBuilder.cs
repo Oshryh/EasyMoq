@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Castle.Windsor;
 using Moq;
@@ -7,12 +6,16 @@ using Component = Castle.MicroKernel.Registration.Component;
 
 namespace EasyMoq
 {
+    /// <summary>
+    /// Provides full recursive mocking of all the dependent classes, and methods to help with testing.
+    /// </summary>
+    /// <typeparam name="TService">The service being test.</typeparam>
+    /// <typeparam name="TIService">The interface of the service which methods are tested.</typeparam>
     public class MockBuilder<TIService, TService> : IDisposable
         where TIService : class
         where TService : class, TIService
     {
         public TestConfiguration TestConfiguration { get; } = new TestConfiguration();
-        private AutoMoqResolver _autoMoqSubResolver;
 
         private IWindsorContainer _mockBuilderContainer;
         private bool _built;
@@ -22,42 +25,32 @@ namespace EasyMoq
         public MockBuilder()
         {
             InitializeNewMockBuilder();
+            TestConfiguration.CoupleInterfaceWithClass<TIService, TService>();
         }
 
-        public MockBuilder(bool build) : this()
+        public void Build()
         {
-            if (build)
-                Build();
-        }
+            if (!TestConfiguration.IsConfigurationRebuildRequired()) return;
 
-        public void Build(bool forceRebuild = false)
-        {
-            if (_built && !forceRebuild) return;
-
-            if (_built && forceRebuild)
+            if (_built)
             {
                 _mockBuilderContainer.Dispose();
                 InitializeNewMockBuilder();
             }
 
-            ApplyTestConfiguration();
+            ApplyDefaultClassesForInterfacesFromAssemblies();
 
             var parametersTypesToRegister = _typeHelpers.GetTypesDependencies(typeof(TService));
+            parametersTypesToRegister.Add(typeof(TIService));
 
-            _autoMoqSubResolver.AddRegisteredTypeRange(parametersTypesToRegister);
-            _typeMocker.RegisterTypes(_mockBuilderContainer, parametersTypesToRegister, TestConfiguration.GetImplementationTypes());
+            TestConfiguration.GetTypesToBeMockedAsStatic().ToList().ForEach(AddStaticOfMockToContainer);
+            _typeMocker.RegisterTypes(parametersTypesToRegister, TestConfiguration.GetImplementationTypes());
 
-            foreach (var type in TestConfiguration.GetTypesToBeMockedAsStatic())
-                AddStaticOfMockToContainer(type);
-
-            _mockBuilderContainer.Register(
-                Component.For<TIService>()
-                    .Instance((TIService)_typeMocker.RegisterMockAndGetInstance(_mockBuilderContainer, typeof(TService), typeof(TIService))));
-
+            TestConfiguration.SetConfigurationBuilt();
             _built = true;
         }
 
-        private void ApplyTestConfiguration()
+        private void ApplyDefaultClassesForInterfacesFromAssemblies()
         {
             if (TestConfiguration.UseDefaultClassesForInterfacesFromAssemblies
                 && TestConfiguration.AssembliesNamesParts.Any())
@@ -72,51 +65,25 @@ namespace EasyMoq
         {
             _mockBuilderContainer = new WindsorContainer();
             _typeHelpers = new TypeHelpers(TestConfiguration);
-            _typeMocker = new TypeMocker(_typeHelpers);
-            _autoMoqSubResolver = new AutoMoqResolver(_mockBuilderContainer.Kernel);
-            _mockBuilderContainer.Kernel.Resolver.AddSubResolver(_autoMoqSubResolver);
-        }
-
-        private void RegisterAllDependencies(IList<Type> parametersTypesToRegister, IReadOnlyDictionary<Type, Type> implementationTypes)
-        {
-            var allDependenciesToRegister = new List<Type>(parametersTypesToRegister);
-            if (TestConfiguration.AllRunningRelevantTypes.Any())
-            {
-                var uncoupledInterfaces =
-                    parametersTypesToRegister.Where(p => p.IsInterface && !implementationTypes.ContainsKey(p));
-
-                foreach (var parameterType in uncoupledInterfaces)
-                {
-                    var inheritingClasses = TestConfiguration.AllRunningRelevantTypes
-                        .Where(p => parameterType.IsAssignableFrom(p)).ToList();
-
-                    if (inheritingClasses.Count == 1)
-                    {
-                        var inheritingClass = inheritingClasses[0];
-                        TestConfiguration.CoupleInterfaceWithClass(parameterType, inheritingClass);
-                        if (!allDependenciesToRegister.Contains(inheritingClass))
-                            allDependenciesToRegister.Add(inheritingClass);
-                    }
-                }
-            }
+            _typeMocker = new TypeMocker(_mockBuilderContainer, _typeHelpers, MockStrategy.UnitTest);
         }
 
         private void AddStaticOfMockToContainer(Type type)
         {
             _mockBuilderContainer.Register(Component.For(typeof(Mock<>).MakeGenericType(type))
                 .Instance(_typeMocker.GetInstanceOfMockOfStaticOf(type)));
-
-            _autoMoqSubResolver.AddRegisteredType(type);
         }
 
         public TIService GetTestedService()
         {
-            var service = _mockBuilderContainer.Resolve<TIService>();
+            Build();
+            var service = GetTestedMockService().Object;
             return service;
         }
 
         public Mock<TIService> GetTestedMockService()
         {
+            Build();
             var service = _mockBuilderContainer.Resolve<Mock<TIService>>();
             return service;
         }
@@ -124,19 +91,21 @@ namespace EasyMoq
         public Mock<T> GetRelatedMock<T>()
             where T : class
         {
+            Build();
             var mock = _mockBuilderContainer.Resolve<Mock<T>>();
             return mock;
         }
 
-        public void ReleaseMock<TInterface>()
-            where TInterface : class
+        public T Resolve<T>()
         {
-            _mockBuilderContainer.Release(GetRelatedMock<TInterface>());
+            Build();
+            return _mockBuilderContainer.Resolve<T>();
         }
 
         public void RegisterServiceInstance<TInstance>(TInstance instance)
             where TInstance : class
         {
+            Build();
             _mockBuilderContainer.Register(Component.For<TInstance>().Instance(instance));
         }
 
@@ -144,5 +113,6 @@ namespace EasyMoq
         {
             _mockBuilderContainer.Dispose();
         }
+
     }
 }

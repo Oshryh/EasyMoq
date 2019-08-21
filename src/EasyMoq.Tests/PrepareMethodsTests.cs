@@ -25,7 +25,6 @@ namespace EasyMoq.Tests
             // Configuration change
             TestConfiguration.CoupleInterfaceWithClass<IInterface3, Class3>();
             // Rebuilding the mock objects
-            ReBuild();
 
             var expectedResult = $"{nameof(Class3)}.Method1";
             result = GetTestedService().UsingClass3Method1();
@@ -46,7 +45,6 @@ namespace EasyMoq.Tests
             TestConfiguration.UseDefaultClassesForInterfacesFromAssemblies = true;
             
             // Rebuilding the mock objects
-            ReBuild();
 
             var expectedResult = $"{nameof(Class3)}.Method1";
             result = GetTestedService().UsingClass3Method1();
