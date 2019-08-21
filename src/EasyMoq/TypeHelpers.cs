@@ -72,7 +72,7 @@ namespace EasyMoq
                 var currentType = typesToCheck.Pop();
 
                 var constructorsParametersTypes = GetAllDistinctConstructorsParametersTypes(currentType)
-                    .Where(p=>!IsChecked(p, dependentTypes)).ToList();
+                    .Where(p => !IsChecked(p, dependentTypes)).ToList();
 
                 dependentTypes.AddRange(constructorsParametersTypes);
 

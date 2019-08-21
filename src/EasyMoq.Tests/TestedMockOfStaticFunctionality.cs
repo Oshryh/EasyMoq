@@ -1,7 +1,6 @@
 using EasyMoq.Tests.TestModelClasses;
 using EasyMoq.Tests.TestModelClasses.ForStaticClassesTests;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace EasyMoq.Tests

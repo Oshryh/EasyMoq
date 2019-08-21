@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
-using Castle.Windsor;
+﻿using Castle.Windsor;
 using Moq;
+using System;
+using System.Linq;
 using Component = Castle.MicroKernel.Registration.Component;
 
 namespace EasyMoq
