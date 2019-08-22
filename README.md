@@ -1,4 +1,4 @@
-# EasyMoq  [![Build status](https://ci.appveyor.com/api/projects/status/km7el3evvelhtl6f/branch/master?svg=true)](https://ci.appveyor.com/project/OshryHorn/easymoq/branch/master)
+# EasyMoq  [![Build status](https://ci.appveyor.com/api/projects/status/km7el3evvelhtl6f/branch/master?svg=true)](https://ci.appveyor.com/project/OshryHorn/easymoq/branch/master) ![Nuget](https://img.shields.io/nuget/v/EasyMoq?color=Green&label=NuGet%3AEasyMoq&style=plastic)
 
 ##### I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)
 
