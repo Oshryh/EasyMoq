@@ -8,6 +8,61 @@ This tiny, simple to use, and very configurable tool, helps writing unit-tests a
 EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
 
 ## How do I use it? (simple example)
+Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class: 
+*Notice the class has both interfaces and classes as dependencies*
+```csharp
+public class LibraryClass : ILibraryClass
+{
+    private readonly ExternalSupplierClass _externalSupplier;
+    private readonly ILoggerClass _logger;
+    private readonly IMonitorClass _monitor;
+    private readonly DataProviderClass _dataProviderClass;
+    private readonly IBusinessLogicClass _businessLogic;
+    private readonly IFeatureServiceClass _featureService;
+
+    public LibraryClass(IExternalSupplierClass externalSupplier, 
+    ILoggerClass logger, 
+    IMonitorClass monitor, 
+    DataProviderClass dataProviderClass, 
+    IBusinessLogicClass businessLogic, 
+    IFeatureServiceClass featureService)
+    {
+        _externalSupplier = externalSupplier;
+        _logger = logger;
+        _monitor = monitor;
+        _dataProviderClass = dataProviderClass;
+        _businessLogic = businessLogic;
+        _featureService = featureService;
+    }
+
+    public string GetInfoFromExternalSupplierAndDb()
+    {
+        return $"Data from supplier: {_externalSupplier.GetDataFromUnreliableSupplier()}";
+    }
+    
+    // More code in the class...
+}
+```
+With EasyMoq all we have to do is this:
+```csharp
+[Fact]
+public void WithEasyMoqTest()
+{
+    var mockBuilder = new MockBuilder<ILibraryClass, LibraryClass>();
+
+    var mockDataFromSupplier = "Mocked data from test supplier";
+    var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
+
+    mockBuilder.GetRelatedMock<IExternalSupplierClass>()
+        .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+
+    var result = mockBuilder.GetTestedService().GetInfoFromExternalSupplierAndDb();
+    result.Should().Be(expectedResult);
+}
+```
+Basically, EasyMoq did all the rest for us. At least 10 lines of pointless code no longer needed, everything is dynamic and immune to irrelevant changes, and so nice and readable! ^_^
+
+### Another example:
 If we have the following classes and interfaces:
 ```csharp
     public interface IExternalSupplierClass
