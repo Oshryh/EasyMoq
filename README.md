@@ -82,8 +82,8 @@ public void OldWayTest()
     result.Should().Be(expectedResult);
 }
 ```
-**But instead, with this framework it will be one of following two options:**
-1)
+#### But instead, with this framework it will be one of following two options:
+1.
 ```csharp
 [Fact]
 public void WithEasyMoqTest()
@@ -100,7 +100,7 @@ public void WithEasyMoqTest()
     result.Should().Be(expectedResult);
 }
 ```
-2)
+2.
 ```csharp
 public class LibraryClassWithBaseTests : BaseServiceTest<ILibraryClass, LibraryClass>
 {
