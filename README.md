@@ -1,6 +1,7 @@
 # EasyMoq  [![Build status](https://ci.appveyor.com/api/projects/status/km7el3evvelhtl6f/branch/master?svg=true)](https://ci.appveyor.com/project/OshryHorn/easymoq/branch/master) [![NuGet Badge](https://buildstats.info/nuget/EasyMoq)](https://www.nuget.org/packages/EasyMoq/)
 This tiny, simple to use, and very configurable tool, helps writing unit-tests and integration tests for well structured code, as well as imperfect code, which is based on IOc (dependencies, classes and interfaces, are passed in the constructors).
-##### I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)
+
+<sub>I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)<sub>
 
 ## What for?
 EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
