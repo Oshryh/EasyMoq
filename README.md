@@ -8,8 +8,8 @@ This tiny, simple to use, and very configurable tool, helps writing unit-tests a
 EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
 
 ## How do I use it? (simple example)
-Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class: 
-*Notice the class has both interfaces and classes as dependencies*
+Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class:
+<sub>Notice the class has both interfaces and classes as dependencies<sub>
 ```csharp
 public class LibraryClass : ILibraryClass
 {
