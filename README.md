@@ -7,7 +7,7 @@ This tiny, simple to use, and very configurable tool, helps writing unit-tests a
 EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
 
 Advantages/features:
-- Saves many lines of code. ([See a Simple EasyMoq Example](https://github.com/Oshryh/EasyMoq/wiki/_Sidebar.Simple-Mock))
+- Saves many lines of code. ([See a Simple EasyMoq Example](https://github.com/Oshryh/EasyMoq/wiki/_Sidebar.Simple-Mock-1))
 - Makes tests more flexible and durable (since there's no need to fix all the tests when a something like ILogger or IMonitor is added to some constructor) and makes life easier.
 - Enables you to test imperfect code by defaultively leaving the original functionality accessible (examples will be added, for now see tests)
 - Can couple an interface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
