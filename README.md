@@ -1,6 +1,5 @@
 # EasyMoq  [![Build status](https://ci.appveyor.com/api/projects/status/km7el3evvelhtl6f/branch/master?svg=true)](https://ci.appveyor.com/project/OshryHorn/easymoq/branch/master) [![NuGet Badge](https://buildstats.info/nuget/EasyMoq)](https://www.nuget.org/packages/EasyMoq/)
-This tiny, simple to use, and very configurable tool, helps writing unit-tests and integration tests for well structured code, as well as imperfect code, which is based on IOc (dependencies, classes and interfaces, are passed in the constructors).
-
+This tiny, simple to use, and very configurable tool, helps writing unit-tests and integration tests for well structured code, as well as imperfect code, which is based on IOc (dependencies, classes and interfaces, are passed in the constructors).  
 <sub>I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)<sub>
 
 ## What for?
@@ -10,8 +9,7 @@ EasyMoq can take a class, mocks all of its dependencies (as taken in the constru
 The easiest way would be to just install the NuGet package through the Visual Studio Package Manager, or to run the following in the Package Manager Console: ```Install-Package EasyMoq```
 
 ## How to use? (simple example)
-Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class:
-
+Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class:  
 <sub>Notice the class has both interfaces and classes as dependencies<sub>
 ```csharp
 public class LibraryClass : ILibraryClass
