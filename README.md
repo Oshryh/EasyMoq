@@ -11,6 +11,7 @@ The easiest way would be to just install the NuGet package through the Visual St
 
 ## How to use? (simple example)
 Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class:
+
 <sub>Notice the class has both interfaces and classes as dependencies<sub>
 ```csharp
 public class LibraryClass : ILibraryClass
