@@ -1,5 +1,7 @@
 ﻿using Moq;
 using System;
+using System.Threading.Tasks;
+using Moq;
 
 namespace EasyMoq
 {
@@ -12,7 +14,7 @@ namespace EasyMoq
         where TIService : class
         where TService : class, TIService
     {
-        private readonly MockBuilder<TIService, TService> _mockBuilder = new MockBuilder<TIService, TService>();
+        private readonly IMockBuilder<TIService> _mockBuilder = new MockBuilder<TIService, TService>();
 
         public TestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
 
@@ -31,11 +33,6 @@ namespace EasyMoq
             return _mockBuilder.GetRelatedMock<T>();
         }
 
-        public void ReleaseMock<TInterface>() where TInterface : class
-        {
-            _mockBuilder.GetRelatedMock<TInterface>();
-        }
-
         public void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class
         {
             _mockBuilder.RegisterServiceInstance(instance);
@@ -46,5 +43,24 @@ namespace EasyMoq
             _mockBuilder.Dispose();
         }
 
+        public async Task<TIService> GetTestedServiceAsync()
+        {
+            return await _mockBuilder.GetTestedServiceAsync().ConfigureAwait(false);
+        }
+
+        public async Task<Mock<TIService>> GetTestedMockServiceAsync()
+        {
+            return await _mockBuilder.GetTestedMockServiceAsync().ConfigureAwait(false);
+        }
+
+        public async Task<Mock<T>> GetRelatedMockAsync<T>() where T : class
+        {
+            return await _mockBuilder.GetRelatedMockAsync<T>().ConfigureAwait(false); ;
+        }
+
+        public async Task RegisterServiceInstanceAsync<TInstance>(TInstance instance) where TInstance : class
+        {
+            await _mockBuilder.RegisterServiceInstanceAsync(instance).ConfigureAwait(false); ;
+        }
     }
 }
