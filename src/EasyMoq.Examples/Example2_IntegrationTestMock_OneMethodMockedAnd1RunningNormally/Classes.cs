@@ -69,6 +69,5 @@
             return _internalLogic.GetInfoFromExternalSupplierAndDb()
                    + _dbProvider.GetOtherDataFromDb();
         }
-
     }
 }

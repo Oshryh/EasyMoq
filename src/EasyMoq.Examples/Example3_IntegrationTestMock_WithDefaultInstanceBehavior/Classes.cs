@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EasyMoq.Examples.Example3_IntegrationTestMock_WithDefaultInstanceBehavior
+﻿namespace EasyMoq.Examples.Example3_IntegrationTestMock_WithDefaultInstanceBehavior
 {
     public interface ILoggerClass
     {

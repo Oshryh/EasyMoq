@@ -1,6 +1,5 @@
 using EasyMoq.Tests.TestModelClasses;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace EasyMoq.Tests
@@ -43,7 +42,7 @@ namespace EasyMoq.Tests
             // Configuration change
             TestConfiguration.AddAssemblyNamePartFilter("EasyMoq");
             TestConfiguration.UseDefaultClassesForInterfacesFromAssemblies = true;
-            
+
             // Rebuilding the mock objects
 
             var expectedResult = $"{nameof(Class3)}.Method1";

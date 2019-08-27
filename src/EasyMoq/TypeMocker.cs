@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Castle.MicroKernel.Registration;
+﻿using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EasyMoq
 {
@@ -58,7 +58,7 @@ namespace EasyMoq
                         .Invoke(newMockInstance, new object[0]);
                 }
 
-                ((Mock) newMockInstance).CallBase = true;
+                ((Mock)newMockInstance).CallBase = true;
                 return newMockInstance;
             }));
 
@@ -126,10 +126,10 @@ namespace EasyMoq
             var desiredMock = _typeOfGenericMock.MakeGenericType(parameterType);
 
             if (_mockStrategy == MockStrategy.UnitTest)
-                return ((Mock) _container.Resolve(desiredMock)).Object;
+                return ((Mock)_container.Resolve(desiredMock)).Object;
             else
                 return _container.Kernel.HasComponent(desiredMock)
-                    ? ((Mock) _container.Resolve(desiredMock)).Object
+                    ? ((Mock)_container.Resolve(desiredMock)).Object
                     : _container.Resolve(parameterType);
         }
 

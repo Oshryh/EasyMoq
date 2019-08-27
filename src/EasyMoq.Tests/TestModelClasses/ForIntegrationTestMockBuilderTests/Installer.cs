@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Castle.MicroKernel.Registration;
+﻿using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 

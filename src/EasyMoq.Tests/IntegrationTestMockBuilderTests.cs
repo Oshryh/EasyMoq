@@ -1,6 +1,4 @@
-using Castle.MicroKernel.Registration;
 using Castle.Windsor;
-using EasyMoq.Tests.TestModelClasses;
 using EasyMoq.Tests.TestModelClasses.ForIntegrationTestMockBuilderTests;
 using FluentAssertions;
 using Xunit;
