@@ -11,7 +11,7 @@ namespace EasyMoq
     /// </summary>
     /// <typeparam name="TService">The service being test.</typeparam>
     /// <typeparam name="TIService">The interface of the service which methods are tested.</typeparam>
-    public class MockBuilder<TIService, TService> : IDisposable
+    public class MockBuilder<TIService, TService> : IDisposable, IMockBuilder<TIService> 
         where TIService : class
         where TService : class, TIService
     {
