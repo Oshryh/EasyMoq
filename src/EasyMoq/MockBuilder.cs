@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Castle.Windsor;
 using Moq;
 using Component = Castle.MicroKernel.Registration.Component;
@@ -30,24 +31,40 @@ namespace EasyMoq
 
         public void Build()
         {
-            if (!TestConfiguration.IsConfigurationRebuildRequired()) return;
+            BuildAsync().GetAwaiter().GetResult();
+        }
 
-            if (_built)
-            {
-                _mockBuilderContainer.Dispose();
-                InitializeNewMockBuilder();
-            }
+        public TIService GetTestedService()
+        {
+            return GetTestedServiceAsync().GetAwaiter().GetResult();
+        }
 
-            ApplyDefaultClassesForInterfacesFromAssemblies();
+        public Mock<TIService> GetTestedMockService()
+        {
+            return GetTestedMockServiceAsync().GetAwaiter().GetResult();
+        }
 
-            var parametersTypesToRegister = _typeHelpers.GetTypesDependencies(typeof(TService));
-            parametersTypesToRegister.Add(typeof(TIService));
+        public Mock<T> GetRelatedMock<T>()
+            where T : class
+        {
+            return GetRelatedMockAsync<T>().GetAwaiter().GetResult();
+        }
 
-            TestConfiguration.GetTypesToBeMockedAsStatic().ToList().ForEach(AddStaticOfMockToContainer);
-            _typeMocker.RegisterTypes(parametersTypesToRegister, TestConfiguration.GetImplementationTypes());
+        [Obsolete("No longer in use")]
+        public T Resolve<T>()
+        {
+            return ResolveAsync<T>().GetAwaiter().GetResult(); 
+        }
 
-            TestConfiguration.SetConfigurationBuilt();
-            _built = true;
+        public void RegisterServiceInstance<TInstance>(TInstance instance)
+            where TInstance : class
+        {
+            RegisterServiceInstanceAsync(instance).GetAwaiter().GetResult();
+        }
+
+        public void Dispose()
+        {
+            _mockBuilderContainer.Dispose();
         }
 
         private void ApplyDefaultClassesForInterfacesFromAssemblies()
@@ -68,51 +85,66 @@ namespace EasyMoq
             _typeMocker = new TypeMocker(_mockBuilderContainer, _typeHelpers, MockStrategy.UnitTest);
         }
 
-        private void AddStaticOfMockToContainer(Type type)
+        private async Task AddStaticOfMockToContainerAsync(Type type)
         {
+            await Task.Delay(10).ConfigureAwait(false);
             _mockBuilderContainer.Register(Component.For(typeof(Mock<>).MakeGenericType(type))
                 .Instance(_typeMocker.GetInstanceOfMockOfStaticOf(type)));
         }
 
-        public TIService GetTestedService()
+        public async Task BuildAsync()
         {
-            Build();
-            var service = GetTestedMockService().Object;
-            return service;
+            await Task.Delay(10).ConfigureAwait(false);
+
+            if (!TestConfiguration.IsConfigurationRebuildRequired()) return;
+
+            if (_built)
+            {
+                _mockBuilderContainer.Dispose();
+                InitializeNewMockBuilder();
+            }
+
+            ApplyDefaultClassesForInterfacesFromAssemblies();
+
+            var parametersTypesToRegister = _typeHelpers.GetTypesDependencies(typeof(TService));
+            parametersTypesToRegister.Add(typeof(TIService));
+
+            await Task.WhenAll(TestConfiguration.GetTypesToBeMockedAsStatic().Select(AddStaticOfMockToContainerAsync));
+            _typeMocker.RegisterTypes(parametersTypesToRegister, TestConfiguration.GetImplementationTypes());
+
+            TestConfiguration.SetConfigurationBuilt();
+            _built = true;
         }
 
-        public Mock<TIService> GetTestedMockService()
+        public async Task<Mock<T>> GetRelatedMockAsync<T>() where T : class
         {
-            Build();
-            var service = _mockBuilderContainer.Resolve<Mock<TIService>>();
-            return service;
-        }
-
-        public Mock<T> GetRelatedMock<T>()
-            where T : class
-        {
-            Build();
+            await BuildAsync().ConfigureAwait(false);
             var mock = _mockBuilderContainer.Resolve<Mock<T>>();
             return mock;
         }
 
-        public T Resolve<T>()
+        public async Task<Mock<TIService>> GetTestedMockServiceAsync()
         {
-            Build();
-            return _mockBuilderContainer.Resolve<T>();
+            return await GetRelatedMockAsync<TIService>().ConfigureAwait(false); ;
         }
 
-        public void RegisterServiceInstance<TInstance>(TInstance instance)
-            where TInstance : class
+        public async Task<TIService> GetTestedServiceAsync()
         {
-            Build();
+            var service = await GetTestedMockServiceAsync().ConfigureAwait(false); ;
+            return service.Object;
+        }
+
+        public async Task RegisterServiceInstanceAsync<TInstance>(TInstance instance) where TInstance : class
+        {
+            await BuildAsync().ConfigureAwait(false);
             _mockBuilderContainer.Register(Component.For<TInstance>().Instance(instance));
         }
 
-        public void Dispose()
+        [Obsolete("No longer in use")]
+        public async Task<T> ResolveAsync<T>()
         {
-            _mockBuilderContainer.Dispose();
+            await BuildAsync().ConfigureAwait(false);
+            return _mockBuilderContainer.Resolve<T>();
         }
-
     }
 }
