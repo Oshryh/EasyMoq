@@ -12,7 +12,6 @@ namespace EasyMoq
         TIService GetTestedService();
         Mock<TIService> GetTestedMockService();
         Mock<T> GetRelatedMock<T>() where T : class;
-        void ReleaseMock<TInterface>() where TInterface : class;
         void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class;
 
     }

@@ -31,11 +31,6 @@ namespace EasyMoq
             return _mockBuilder.GetRelatedMock<T>();
         }
 
-        public void ReleaseMock<TInterface>() where TInterface : class
-        {
-            _mockBuilder.GetRelatedMock<TInterface>();
-        }
-
         public void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class
         {
             _mockBuilder.RegisterServiceInstance(instance);
