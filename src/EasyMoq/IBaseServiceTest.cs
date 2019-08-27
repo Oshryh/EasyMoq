@@ -1,4 +1,5 @@
 ﻿using Moq;
+using System.Threading.Tasks;
 
 namespace EasyMoq
 {
@@ -12,8 +13,12 @@ namespace EasyMoq
         TIService GetTestedService();
         Mock<TIService> GetTestedMockService();
         Mock<T> GetRelatedMock<T>() where T : class;
-        void ReleaseMock<TInterface>() where TInterface : class;
         void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class;
+
+        Task<TIService> GetTestedServiceAsync();
+        Task<Mock<TIService>> GetTestedMockServiceAsync();
+        Task<Mock<T>> GetRelatedMockAsync<T>() where T : class;
+        Task RegisterServiceInstanceAsync<TInstance>(TInstance instance) where TInstance : class;
 
     }
 }
