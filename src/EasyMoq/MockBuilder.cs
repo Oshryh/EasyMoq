@@ -213,10 +213,12 @@ namespace EasyMoq
             }
 
             await Task.WhenAll(TestConfiguration.GetTypesToBeMockedAsStatic()
-                .Select(p => Task.Run(() => AddStaticOfMockToContainer(p))));
+                    .Select(p => Task.Run(() => AddStaticOfMockToContainer(p))))
+                .ConfigureAwait(false);
             _typeMocker.RegisterTypes(typesToRegister, TestConfiguration.GetImplementationTypes());
 
-            await Task.WhenAll(TestConfiguration.GetMockActions().Select(p => Task.Run(() => p(this))).ToArray());
+            await Task.WhenAll(TestConfiguration.GetMockActions().Select(p => Task.Run(() => p(this))).ToArray())
+                .ConfigureAwait(false);
 
             TestConfiguration.SetConfigurationBuilt();
             _built = true;
@@ -281,7 +283,7 @@ namespace EasyMoq
 
         protected virtual async Task BuildAsync()
         {
-            await BuildAsync<TService>();
+            await BuildAsync<TService>().ConfigureAwait(false); ;
         }
 
         public virtual void AddTestedServiceMockAction(Action<Mock<TService>> mockAction)
@@ -296,7 +298,7 @@ namespace EasyMoq
 
         public virtual async Task<TService> GetTestedServiceAsync()
         {
-            await BuildAsync();
+            await BuildAsync().ConfigureAwait(false); ;
             var service = GetRelatedMock<TService>();
             return service.Object;
         }
@@ -383,7 +385,7 @@ namespace EasyMoq
 
         public new async Task<TIService> GetTestedServiceAsync()
         {
-            await BuildAsync();
+            await BuildAsync().ConfigureAwait(false);
             var service = GetRelatedMock<TIService>();
             return service.Object;
         }
