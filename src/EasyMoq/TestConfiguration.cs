@@ -8,6 +8,7 @@ namespace EasyMoq
     {
         private readonly List<Type> _typesToBeMockedAsStatic = new List<Type>();
         private readonly Dictionary<Type, Type> _implementationTypes = new Dictionary<Type, Type>();
+        private readonly List<Action<MockBuilder>> _mocksToRun = new List<Action<MockBuilder>>();
 
         private bool _rebuildRequired = true;
 
@@ -15,6 +16,12 @@ namespace EasyMoq
         public bool UseDefaultClassesForInterfacesFromAssemblies { get; set; }
 
         public List<Type> AllRunningRelevantTypes { get; private set; } = new List<Type>();
+
+        public void AddMockToRun(Action<MockBuilder> mockAction)
+        {
+            _mocksToRun.Add(mockAction);
+            SetConfigurationRebuildRequired();
+        }
 
         public void CoupleInterfaceWithClass<TInterface, TClass>()
         {
@@ -54,6 +61,11 @@ namespace EasyMoq
             return _implementationTypes.TryGetValue(parameterType, out inheritingClass);
         }
 
+        private void SetConfigurationRebuildRequired()
+        {
+            _rebuildRequired = true;
+        }
+
         internal void SetRunningRelevantTypes(List<Type> allRunningRelevantTypes)
         {
             AllRunningRelevantTypes = allRunningRelevantTypes;
@@ -64,14 +76,14 @@ namespace EasyMoq
             _rebuildRequired = false;
         }
 
-        internal void SetConfigurationRebuildRequired()
-        {
-            _rebuildRequired = true;
-        }
-
         internal bool IsConfigurationRebuildRequired()
         {
             return _rebuildRequired;
+        }
+
+        internal List<Action<MockBuilder>> GetMockActions()
+        {
+            return _mocksToRun;
         }
     }
 }

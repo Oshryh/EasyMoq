@@ -10,15 +10,14 @@ namespace EasyMoq.Tests
         [Fact]
         public void Test1()
         {
-            var container = new WindsorContainer().Install(new Installer());
-
-            var integrationTestMockBuilder = new IntegrationTestMockBuilder<ITestIntegrationApp, TestIntegrationApp>(container,
-                typeof(IExternalSupplierClass));
+            var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
+                new Installer(),
+                config => config.WithTestDependenciesToMock(TestDependency.OfInterface<IExternalSupplierClass>()));
 
             var mockDataFromSupplier = "Mock data from supplier";
 
-            integrationTestMockBuilder.GetRelatedMock<IExternalSupplierClass>()
-                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+            integrationTestMockBuilder.AddMockActionOf<IExternalSupplierClass>(mock =>
+                mock.Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier));
 
             var expectedResult = "Logged a message" + mockDataFromSupplier + "Data from DB" + "Other data from DB";
 
@@ -29,16 +28,17 @@ namespace EasyMoq.Tests
         [Fact]
         public void Test2()
         {
-            var container = new WindsorContainer().Install(new Installer());
-
-            var integrationTestMockBuilder = new IntegrationTestMockBuilder<ITestIntegrationApp, TestIntegrationApp>(container,
-                typeof(IExternalSupplierClass), typeof(ILoggerClass));
-            integrationTestMockBuilder.TestConfiguration.CoupleInterfaceWithClass<ILoggerClass, LoggerClass>();
+            var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
+                new Installer(),
+                config => config.WithTestDependenciesToMock(
+                    TestDependency.OfInterface<IExternalSupplierClass>(),
+                    TestDependency.OfInterface<ILoggerClass>().ImplementedBy<LoggerClass>()
+                ));
 
             var mockDataFromSupplier = "Mock data from supplier";
 
-            integrationTestMockBuilder.GetRelatedMock<IExternalSupplierClass>()
-                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+            integrationTestMockBuilder.AddMockActionOf<IExternalSupplierClass>(mock =>
+                mock.Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier));
 
             var expectedResult = "Logged a message" + mockDataFromSupplier + "Data from DB" + "Other data from DB";
 
