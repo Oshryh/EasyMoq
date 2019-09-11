@@ -18,11 +18,10 @@ namespace EasyMoq.Tests
         public void TestedService_TestMockedClassMethodCalling()
         {
             const string testValue = "MockTest";
-            var testedService = GetTestedService();
 
-            GetRelatedMock<Class1>().Setup(x => x.Method1()).Returns(testValue);
+            AddMockActionOf<Class1>(class1Mock => class1Mock.Setup(x => x.Method1()).Returns(() => testValue));
 
-            var result = testedService.Method1_UsingClass1Method1();
+            var result = GetTestedService().Method1_UsingClass1Method1();
 
             result.Should().Be(testValue);
         }
@@ -41,11 +40,10 @@ namespace EasyMoq.Tests
         public void TestedService_TestMockedInterfaceMethodCalling()
         {
             const string testValue = "MockTest";
-            var testedService = GetTestedService();
 
-            GetRelatedMock<IInterface3>().Setup(x => x.Method1()).Returns(testValue);
+            AddMockActionOf<IInterface3>(interface3Mock => interface3Mock.Setup(x => x.Method1()).Returns(testValue));
 
-            var result = testedService.Method3_UsingClass3Method1();
+            var result = GetTestedService().Method3_UsingClass3Method1();
 
             result.Should().Be(testValue);
         }

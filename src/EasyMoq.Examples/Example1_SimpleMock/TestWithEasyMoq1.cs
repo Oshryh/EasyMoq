@@ -8,7 +8,7 @@ namespace EasyMoq.Examples.Example1_SimpleMock
         [Fact]
         public void Test()
         {
-            GetRelatedMock<IInterface1>().Setup(x => x.Method1()).Returns("+test");
+            AddMockActionOf<IInterface1>(i1 => i1.Setup(x => x.Method1()).Returns("+test"));
 
             var testResult = GetTestedService().UsingClass2Method1();
 
