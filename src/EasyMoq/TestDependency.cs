@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using EasyMoq.Interfaces.TestDependencyInterfaces;
 using Moq;
 
@@ -8,16 +9,10 @@ namespace EasyMoq
 {
     public static class TestDependency
     {
-        public static ITestDependencyInterface<TDependencyInterface> OfInterface<TDependencyInterface>()
+        public static ITestDependency<TDependencyInterface> Of<TDependencyInterface>()
             where TDependencyInterface : class
         {
             return new TestDependency<TDependencyInterface>();
-        }
-
-        public static ITestMockedDependency<TMockedDependency> OfMock<TMockedDependency>()
-            where TMockedDependency : class
-        {
-            return new TestDependency<TMockedDependency>();
         }
 
         public static ITestStaticDependency<TStaticDependency> OfStatic<TStaticDependency>()
@@ -27,64 +22,71 @@ namespace EasyMoq
         }
     }
 
-    public class TestDependency<TDependencyInterface> : ITestDependencyInterface<TDependencyInterface>,
-        ITestStaticDependency<TDependencyInterface>, ITestMockedDependency<TDependencyInterface>,
-        ITestMockedDependencyWithActions<TDependencyInterface>
-        where TDependencyInterface : class
+    public class TestDependency<TDependencyType> :
+        ITestDependency<TDependencyType>,
+        ITestStaticDependency<TDependencyType>,
+        ITestMockedDependencyWithActions<TDependencyType>,
+        ITestDependencyImplementation<TDependencyType>
+        where TDependencyType : class
     {
-        private readonly List<Action<Mock<TDependencyInterface>>> _mockActions =
-            new List<Action<Mock<TDependencyInterface>>>();
+        private readonly List<Action<Mock<TDependencyType>>> _mockActions =
+            new List<Action<Mock<TDependencyType>>>();
 
         private readonly Type _dependencyInterfaceType;
         private Type _dependencyClassType;
 
-        public Type GetDependencyInterface()
+        internal TestDependency()
+        {
+            var dependencyType = typeof(TDependencyType);
+
+            if (dependencyType.IsInterface)
+                _dependencyInterfaceType = dependencyType;
+            else
+                _dependencyClassType = dependencyType;
+        }
+
+        public Type GetDependencyType()
         {
             return _dependencyInterfaceType;
         }
 
-        public Type GetDependencyClass()
+        public Type GetDependencyChildType()
         {
             return _dependencyClassType;
         }
 
         public Type GetStaticDependencyType()
         {
-            return GetDependencyInterface();
+            return GetDependencyType();
         }
 
-        internal TestDependency()
-        {
-            _dependencyInterfaceType = typeof(TDependencyInterface);
-        }
-
-        public ITestDependencyImplementation ImplementedBy<TDependencyClass>()
-            where TDependencyClass : class, TDependencyInterface
-        {
-            _dependencyClassType = typeof(TDependencyClass);
-            return this;
-        }
-
-        public List<Action<MockBuilder>> GetMockedDependencyActions()
+        public IEnumerable<Action<MockBuilder>> GetMockedDependencyActions()
         {
             return _mockActions.Select(mockAction =>
                     (Action<MockBuilder>)(mockBuilder => mockBuilder.AddMockActionOf(mockAction)))
                 .ToList();
         }
 
-        public ITestMockedDependencyWithActions<TDependencyInterface> WithAction(
-            Action<Mock<TDependencyInterface>> mockAction)
+        public ITestDependencyImplementation<TDependencyType> ImplementedBy<TDependencyClass>()
+            where TDependencyClass : class, TDependencyType
+        {
+            _dependencyClassType = typeof(TDependencyClass);
+            return this;
+        }
+
+        ITestMockedDependencyWithActions<TDependencyType> ITestMockedDependency<TDependencyType>.WithAction(
+            Action<Mock<TDependencyType>> mockAction)
         {
             _mockActions.Add(mockAction);
             return this;
         }
 
-        public ITestMockedDependencyWithActions<TDependencyInterface> AndAction(
-            Action<Mock<TDependencyInterface>> mockAction)
+        ITestMockedDependencyWithActions<TDependencyType> ITestMockedDependencyWithActions<TDependencyType>.AndAction(
+            Action<Mock<TDependencyType>> mockAction)
         {
-            return WithAction(mockAction);
+            _mockActions.Add(mockAction);
+            return this;
         }
 
     }
-
 }

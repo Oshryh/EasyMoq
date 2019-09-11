@@ -13,7 +13,7 @@ namespace EasyMoq.Examples.Example2_IntegrationTestMock_OneMethodMockedAnd1Runni
 
             var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
                 new Installer(),
-                config => config.WithTestDependenciesToMock(TestDependency.OfInterface<IExternalSupplierClass>()));
+                config => config.WithTestDependenciesToMock(TestDependency.Of<IExternalSupplierClass>()));
 
             var mockDataFromSupplier = "Mock data from supplier";
 

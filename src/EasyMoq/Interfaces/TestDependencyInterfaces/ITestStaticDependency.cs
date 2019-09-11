@@ -1,14 +1,6 @@
-﻿using System;
-
-namespace EasyMoq.Interfaces.TestDependencyInterfaces
+﻿namespace EasyMoq.Interfaces.TestDependencyInterfaces
 {
-    public interface ITestStaticDependency
-    {
-        Type GetStaticDependencyType();
-    }
-
-    public interface ITestStaticDependency<in TDependencyType>
-        : ITestDependencyImplementer<TDependencyType>, ITestStaticDependency
+    public interface ITestStaticDependency<TDependencyType> : ITestDependencyImplementer<TDependencyType>
         where TDependencyType : class
     {
     }

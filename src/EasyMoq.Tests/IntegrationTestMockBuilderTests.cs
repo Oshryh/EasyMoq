@@ -12,7 +12,7 @@ namespace EasyMoq.Tests
         {
             var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
                 new Installer(),
-                config => config.WithTestDependenciesToMock(TestDependency.OfInterface<IExternalSupplierClass>()));
+                config => config.WithTestDependenciesToMock(TestDependency.Of<IExternalSupplierClass>()));
 
             var mockDataFromSupplier = "Mock data from supplier";
 
@@ -31,8 +31,8 @@ namespace EasyMoq.Tests
             var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
                 new Installer(),
                 config => config.WithTestDependenciesToMock(
-                    TestDependency.OfInterface<IExternalSupplierClass>(),
-                    TestDependency.OfInterface<ILoggerClass>().ImplementedBy<LoggerClass>()
+                    TestDependency.Of<IExternalSupplierClass>(),
+                    TestDependency.Of<ILoggerClass>().ImplementedBy<LoggerClass>()
                 ));
 
             var mockDataFromSupplier = "Mock data from supplier";

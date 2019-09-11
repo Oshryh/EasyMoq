@@ -47,6 +47,25 @@ namespace EasyMoq
             return testBuilder;
         }
 
+        public static IMockBuilder<TService> UnitTest<TService>(params ITestDependency[] testDependencies)
+            where TService : class
+        {
+            var testBuilder = new MockBuilder<TService>();
+            //func.Invoke(testBuilder);
+
+            return testBuilder;
+        }
+
+        public static IMockBuilder<TIService, TService> UnitTest<TIService, TService>(params ITestDependency[] testDependencies)
+            where TIService : class
+            where TService : class, TIService
+        {
+            var testBuilder = new MockBuilder<TIService, TService>();
+            //func.Invoke(testBuilder);
+
+            return testBuilder;
+        }
+
         public static IMockBuilder<TService> IntegrationTest<TService>(IWindsorInstaller windsorInstaller, Action<IIntegrationTestBuilderOf<TService>> func)
             where TService : class
         {
@@ -82,7 +101,27 @@ namespace EasyMoq
 
             return testBuilder;
         }
-        
+
+        public static IMockBuilder<TService> IntegrationTest<TService>(IWindsorInstaller windsorInstaller, params ITestDependency[] testDependencies)
+            where TService : class
+        {
+            var testBuilder = new MockBuilder<TService>(windsorInstaller);
+            //func.Invoke(testBuilder);
+
+            return testBuilder;
+        }
+
+        public static IMockBuilder<TIService, TService> IntegrationTest<TIService, TService>(IWindsorInstaller windsorInstaller, params ITestDependency[] testDependencies)
+            where TIService : class
+            where TService : class, TIService
+        {
+            var testBuilder = new MockBuilder<TIService, TService>(windsorInstaller);
+            //func.Invoke(testBuilder);
+
+            return testBuilder;
+        }
+
+
         #endregion
     }
 
@@ -155,15 +194,15 @@ namespace EasyMoq
             foreach (var testDependency in testDependencies)
             {
                 TestConfiguration.CoupleInterfaceWithClass(
-                    testDependency.GetDependencyInterface(),
-                    testDependency.GetDependencyClass());
+                    testDependency.GetDependencyType(),
+                    testDependency.GetDependencyChildType());
             }
         }
 
         protected void AddTestDependenciesToMock(params ITestDependencyImplementation[] testDependencies)
         {
             AddTestDependencies(testDependencies);
-            TypesToMock.AddRange(testDependencies.Select(p=>p.GetDependencyInterface()));
+            TypesToMock.AddRange(testDependencies.Select(p=>p.GetDependencyType()));
         }
 
         protected void AddTestMockActions(params ITestMockedDependencyAction[] mockActions)

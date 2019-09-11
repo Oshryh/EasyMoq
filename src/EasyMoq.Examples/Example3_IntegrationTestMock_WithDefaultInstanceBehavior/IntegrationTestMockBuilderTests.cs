@@ -12,8 +12,8 @@ namespace EasyMoq.Examples.Example3_IntegrationTestMock_WithDefaultInstanceBehav
             var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
                 new Installer(),
                 config => config.WithTestDependenciesToMock(
-                    TestDependency.OfInterface<IExternalSupplierClass>(),
-                    TestDependency.OfInterface<ILoggerClass>().ImplementedBy<LoggerClass>())
+                    TestDependency.Of<IExternalSupplierClass>(),
+                    TestDependency.Of<ILoggerClass>().ImplementedBy<LoggerClass>())
             );
 
             var mockDataFromSupplier = "Mock data from supplier";

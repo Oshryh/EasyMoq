@@ -1,8 +1,8 @@
 ﻿namespace EasyMoq.Interfaces.TestDependencyInterfaces
 {
-    public interface ITestDependencyImplementer<in TInterface> where TInterface : class
+    public interface ITestDependencyImplementer<TInterface> : ITestDependency where TInterface : class
     {
-        ITestDependencyImplementation ImplementedBy<TDependencyClass>()
+        ITestDependencyImplementation<TInterface> ImplementedBy<TDependencyClass>()
             where TDependencyClass : class, TInterface;
     }
 }

@@ -1,10 +1,7 @@
-﻿using System;
-
-namespace EasyMoq.Interfaces.TestDependencyInterfaces
+﻿namespace EasyMoq.Interfaces.TestDependencyInterfaces
 {
-    public interface ITestDependencyImplementation
+    public interface ITestDependencyImplementation<TImplementation> : ITestMockedDependency<TImplementation>
+        where TImplementation : class
     {
-        Type GetDependencyInterface();
-        Type GetDependencyClass();
     }
 }
