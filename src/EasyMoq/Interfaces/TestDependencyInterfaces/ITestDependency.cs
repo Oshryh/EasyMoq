@@ -5,7 +5,7 @@ namespace EasyMoq.Interfaces.TestDependencyInterfaces
 {
     public interface ITestMockedDependencyAction
     {
-        IEnumerable<Action<MockBuilder>> GetMockedDependencyActions();
+        List<Action<MockBuilder>> GetMockedDependencyActions();
     }
 
     public interface ITestStaticDependency
@@ -15,12 +15,13 @@ namespace EasyMoq.Interfaces.TestDependencyInterfaces
 
     public interface ITestDependencyImplementation
     {
-        Type GetDependencyType();
         Type GetDependencyChildType();
     }
 
     public interface ITestDependency : ITestStaticDependency, ITestMockedDependencyAction, ITestDependencyImplementation
     {
+        bool IsStatic { get; }
+        Type GetDependencyType();
     }
 
     public interface ITestDependency<TInterface> :

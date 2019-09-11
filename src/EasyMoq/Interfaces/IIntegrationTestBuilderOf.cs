@@ -5,7 +5,7 @@ namespace EasyMoq.Interfaces
     public interface IIntegrationTestBuilderOf<TTest>
         where TTest : class
     {
-        IIntegrationTestBuilderOf<TTest> WithTestDependenciesToMock(params ITestDependencyImplementation[] testDependencies);
+        IIntegrationTestBuilderOf<TTest> WithTestDependenciesToMock(params ITestDependency[] testDependencies);
         IIntegrationTestBuilderOf<TTest> WithTestMockActions(params ITestMockedDependencyAction[] mockActions);
         IIntegrationTestBuilderOf<TTest> WithTestStaticDependenciesToMock(params ITestStaticDependency[] staticTestDependencies);
     }
@@ -14,7 +14,7 @@ namespace EasyMoq.Interfaces
         where TITest : class
         where TTest : class, TITest
     {
-        IIntegrationTestBuilderOf<TITest, TTest> WithTestDependenciesToMock(params ITestDependencyImplementation[] testDependencies);
+        IIntegrationTestBuilderOf<TITest, TTest> WithTestDependenciesToMock(params ITestDependency[] testDependencies);
         IIntegrationTestBuilderOf<TTest> WithTestMockActions(params ITestMockedDependencyAction[] mockActions);
         IIntegrationTestBuilderOf<TITest, TTest> WithTestStaticDependenciesToMock(params ITestStaticDependency[] staticTestDependencies);
     }
