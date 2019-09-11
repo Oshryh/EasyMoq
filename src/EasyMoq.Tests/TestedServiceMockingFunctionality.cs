@@ -18,32 +18,30 @@ namespace EasyMoq.Tests
         public void TestedService_TestMockedMethodCalling()
         {
             const string testValue = "MockTest";
-            var testedService = GetTestedService();
 
-            GetTestedMockService().Setup(x => x.Method1()).Returns(testValue);
+            AddTestedServiceMockAction(mock => mock.Setup(x => x.Method1()).Returns(testValue));
 
-            var result = testedService.Method1();
+            var result = GetTestedService().Method1();
 
             result.Should().Be(testValue);
 
             // Verify other methods (with no mocked behavior) are still acting the same.
-            testedService.Method2().Should().Be($"{nameof(Class1)}.{nameof(testedService.Method2)}");
+            GetTestedService().Method2().Should().Be($"{nameof(Class1)}.{nameof(IInterface1.Method2)}");
         }
 
         [Fact]
         public void TestedService_TestMockedMethodCallingByOtherNonMockedMethod()
         {
             const string testValue = "MockTest";
-            var testedService = GetTestedService();
 
-            GetTestedMockService().Setup(x => x.Method1()).Returns(testValue);
+            AddTestedServiceMockAction(mock => mock.Setup(x => x.Method1()).Returns(testValue));
 
-            var result = GetTestedMockService().Object.Method3_CallingMethod1();
+            var result = GetTestedService().Method3_CallingMethod1();
 
             result.Should().Be(testValue);
 
             // Verify other methods (with no mocked behavior) are still acting the same.
-            testedService.Method2().Should().Be($"{nameof(Class1)}.{nameof(testedService.Method2)}");
+            GetTestedService().Method2().Should().Be($"{nameof(Class1)}.{nameof(IInterface1.Method2)}");
         }
 
     }

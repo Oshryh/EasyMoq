@@ -1,6 +1,5 @@
 using EasyMoq.Tests.TestModelClasses;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace EasyMoq.Tests
@@ -43,7 +42,7 @@ namespace EasyMoq.Tests
             // Configuration change
             TestConfiguration.AddAssemblyNamePartFilter("EasyMoq");
             TestConfiguration.UseDefaultClassesForInterfacesFromAssemblies = true;
-            
+
             // Rebuilding the mock objects
 
             var expectedResult = $"{nameof(Class3)}.Method1";
@@ -59,7 +58,8 @@ namespace EasyMoq.Tests
         {
             var expectedResult = $"{nameof(Class3)}.MockedMethod";
 
-            GetRelatedMock<IInterface3>().Setup(x => x.Method1()).Returns(expectedResult);
+            AddMockActionOf<IInterface3>(interface3Mock => 
+                interface3Mock.Setup(x => x.Method1()).Returns(expectedResult));
             var result = GetTestedService().Method3_UsingClass3Method1();
 
             // After coupling the interface Interface3 with the class Class3, when calling an un-mocked method on the mocked

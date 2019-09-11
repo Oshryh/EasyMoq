@@ -1,7 +1,6 @@
 using EasyMoq.Tests.TestModelClasses;
 using EasyMoq.Tests.TestModelClasses.ForStaticClassesTests;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace EasyMoq.Tests
@@ -15,10 +14,11 @@ namespace EasyMoq.Tests
 
             TestConfiguration.AddTypeToBeMockedAsStatic(typeof(IDatabaseSettings));
 
-            var mockedDatabaseSettings = GetRelatedMock<IDatabaseSettings>();
-            mockedDatabaseSettings.Setup(x => x.GetSettingsValue("Key1")).Returns(() => expectedResult);
-
-            ConfigurationManager.WithDatabaseSettings(mockedDatabaseSettings.Object);
+            AddMockActionOf<IDatabaseSettings>(iDbSettingsMock =>
+            {
+                iDbSettingsMock.Setup(x => x.GetSettingsValue("Key1")).Returns(() => expectedResult);
+                ConfigurationManager.WithDatabaseSettings(iDbSettingsMock.Object);
+            });
 
             var result = GetTestedService().Method4_CallingStaticConfigKey1();
 
@@ -30,7 +30,8 @@ namespace EasyMoq.Tests
         public void TestedService_TestMockedClassMethodCallingUnMockedMethod_ShouldBeNull()
         {
             TestConfiguration.AddTypeToBeMockedAsStatic(typeof(IDatabaseSettings));
-            ConfigurationManager.WithDatabaseSettings(GetRelatedMock<IDatabaseSettings>().Object);
+
+            AddMockActionOf<IDatabaseSettings>(iDbSettingsMock => ConfigurationManager.WithDatabaseSettings(iDbSettingsMock.Object));
 
             var result = GetTestedService().Method5_CallingStaticConfigKey2();
 
