@@ -9,15 +9,16 @@ namespace EasyMoq.Examples.Example2_IntegrationTestMock_OneMethodMockedAnd1Runni
         [Fact]
         public void Test1()
         {
-            var container = new WindsorContainer().Install(new Installer());
+            var container = new WindsorContainer().Install();
 
-            var integrationTestMockBuilder = new IntegrationTestMockBuilder<ITestIntegrationApp, TestIntegrationApp>(container,
-                typeof(IExternalSupplierClass));
+            var integrationTestMockBuilder = MockBuilder.IntegrationTest<ITestIntegrationApp, TestIntegrationApp>(
+                new Installer(),
+                config => config.WithTestDependenciesToMock(TestDependency.Of<IExternalSupplierClass>()));
 
             var mockDataFromSupplier = "Mock data from supplier";
 
-            integrationTestMockBuilder.GetRelatedMock<IExternalSupplierClass>()
-                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+            integrationTestMockBuilder.AddMockActionOf<IExternalSupplierClass>(supplierMock =>
+                supplierMock.Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier));
 
             var expectedResult = mockDataFromSupplier + "Data from DB" + "Other data from DB";
 
