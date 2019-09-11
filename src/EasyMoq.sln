@@ -7,9 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyMoq", "EasyMoq\EasyMoq.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyMoq.Tests", "EasyMoq.Tests\EasyMoq.Tests.csproj", "{2B5FC534-64D7-4D1B-818C-A0AC1B058D62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyMoq.Examples", "EasyMoq.Examples\EasyMoq.Examples.csproj", "{15C16AE9-4B7A-4103-84AF-EBFCCCBFBC25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyMoq.Examples", "EasyMoq.Examples\EasyMoq.Examples.csproj", "{15C16AE9-4B7A-4103-84AF-EBFCCCBFBC25}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectItems", "ProjectItems", "{A5805A24-0A61-477A-908D-D4B3A57B865D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{A5805A24-0A61-477A-908D-D4B3A57B865D}"
+	ProjectSection(SolutionItems) = preProject
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +36,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{15C16AE9-4B7A-4103-84AF-EBFCCCBFBC25} = {A5805A24-0A61-477A-908D-D4B3A57B865D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8494BDE1-0B2F-43F5-BC86-EE639A4DD0D1}

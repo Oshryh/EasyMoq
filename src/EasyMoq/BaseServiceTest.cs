@@ -1,49 +1,96 @@
 ﻿using Moq;
 using System;
+using System.Threading.Tasks;
+using EasyMoq.Interfaces;
 
 namespace EasyMoq
 {
-    /// <summary>
-    /// Base class which provides full recursive mocking of all the dependent classes, and methods to help with testing.
-    /// </summary>
-    /// <typeparam name="TService">The service being test.</typeparam>
-    /// <typeparam name="TIService">The interface of the service which methods are tested.</typeparam>
-    public abstract class BaseServiceTest<TIService, TService> : IBaseServiceTest<TIService>, IDisposable
-        where TIService : class
-        where TService : class, TIService
+    public abstract class BaseServiceTest : IBaseServiceTest, IDisposable
     {
-        private readonly MockBuilder<TIService, TService> _mockBuilder = new MockBuilder<TIService, TService>();
+        private readonly IMockBuilder _mockBuilder;
+
+        protected T GetMockBuilder<T>() where T : IMockBuilder
+        {
+            return (T)_mockBuilder;
+        }
 
         public TestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
 
-        public TIService GetTestedService()
+        protected BaseServiceTest(IMockBuilder mockBuilder)
         {
-            return _mockBuilder.GetTestedService();
+            _mockBuilder = mockBuilder;
         }
 
-        public Mock<TIService> GetTestedMockService()
+        public void AddMockActionOf<T>(Action<Mock<T>> mockAction) where T : class
         {
-            return _mockBuilder.GetTestedMockService();
-        }
-
-        public Mock<T> GetRelatedMock<T>() where T : class
-        {
-            return _mockBuilder.GetRelatedMock<T>();
-        }
-
-        public void ReleaseMock<TInterface>() where TInterface : class
-        {
-            _mockBuilder.GetRelatedMock<TInterface>();
-        }
-
-        public void RegisterServiceInstance<TInstance>(TInstance instance) where TInstance : class
-        {
-            _mockBuilder.RegisterServiceInstance(instance);
+            _mockBuilder.AddMockActionOf(mockAction);
         }
 
         public void Dispose()
         {
             _mockBuilder.Dispose();
+        }
+
+    }
+
+    /// <summary>
+    /// Base class which provides full recursive mocking of all the dependent classes, and methods to help with testing.
+    /// </summary>
+    /// <typeparam name="TService">The service being test.</typeparam>
+    public abstract class BaseServiceTest<TService> : BaseServiceTest, IBaseServiceTest<TService>
+        where TService : class
+    {
+        private IMockBuilder<TService> MockBuilder => GetMockBuilder<IMockBuilder<TService>>();
+
+        protected BaseServiceTest() : base(new MockBuilder<TService>()) { }
+
+        protected BaseServiceTest(MockBuilder<TService> mockBuilder) : base(mockBuilder)
+        { }
+
+        public TService GetTestedService()
+        {
+            return MockBuilder.GetTestedService();
+        }
+
+        public virtual void AddTestedServiceMockAction(Action<Mock<TService>> mockAction)
+        {
+            MockBuilder.AddTestedServiceMockAction(mockAction);
+        }
+
+        public async Task<TService> GetTestedServiceAsync()
+        {
+            return await MockBuilder.GetTestedServiceAsync().ConfigureAwait(false);
+        }
+
+    }
+
+    /// <summary>
+    /// Base class which provides full recursive mocking of all the dependent classes, and methods to help with testing.
+    /// </summary>
+    /// <typeparam name="TService">The service being test.</typeparam>
+    /// <typeparam name="TIService">The interface of the service which methods are tested.</typeparam>
+    public abstract class BaseServiceTest<TIService, TService> : BaseServiceTest<TService>, IBaseServiceTest<TIService, TService>
+        where TIService : class
+        where TService : class, TIService
+    {
+        private IMockBuilder<TIService, TService> MockBuilder => GetMockBuilder<IMockBuilder<TIService, TService>>();
+
+        protected BaseServiceTest() : base(new MockBuilder<TIService, TService>())
+        { }
+
+        public void AddTestedServiceMockAction(Action<Mock<TIService>> mockAction)
+        {
+            MockBuilder.AddTestedServiceMockAction(mockAction);
+        }
+
+        public new TIService GetTestedService()
+        {
+            return MockBuilder.GetTestedService();
+        }
+
+        public new async Task<TIService> GetTestedServiceAsync()
+        {
+            return await MockBuilder.GetTestedServiceAsync().ConfigureAwait(false);
         }
 
     }

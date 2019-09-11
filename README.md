@@ -1,123 +1,186 @@
-# EasyMoq
+# EasyMoq  [![Build status](https://ci.appveyor.com/api/projects/status/km7el3evvelhtl6f/branch/master?svg=true)](https://ci.appveyor.com/project/OshryHorn/easymoq/branch/master) [![NuGet Badge](https://buildstats.info/nuget/EasyMoq)](https://www.nuget.org/packages/EasyMoq/)
+This tiny, simple to use, and very configurable tool, helps writing unit-tests and integration tests for well structured code, as well as imperfect code, which is based on IOc (dependencies, classes and interfaces, are passed in the constructors).  
+<sub>I'm adding more examples and documentation as time permits. If you have specific requests or questions, please ask! :)<sub>
 
-This tiny, simple to use, and very configurable tool, which helps write tests for well structured code, as well as imperfect code.
-
+## What for?
 EasyMoq can take a class, mocks all of its dependencies (as taken in the constructor) recursively (will mock as possible and configured the dependencies of the dependencies) and leave us to write only the code that's really relevant to the test.
 
-Advantages/features:
-- Saves many lines of code.
-- Makes tests more flexible and durable (since there's no need to fix all the tests when a something like ILogger or IMonitor is added to some constructor) and makes life easier.
-- Enables you to test imperfect code by defaultively leaving the original functionality accessible (examples will be added, for now see tests)
-- Can couple an inteface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
+## How to install?
+The easiest way would be to just install the NuGet package through the Visual Studio Package Manager, or to run the following in the Package Manager Console: ```Install-Package EasyMoq```
 
-## Examples
+## How to use? (simple example)
+Let's say we want to test the 'GetInfoFromExternalSupplierAndDb()' method of following class:  
+<sub>Notice the class has both interfaces and classes as dependencies<sub>
+```csharp
+public class LibraryClass : ILibraryClass
+{
+    private readonly ExternalSupplierClass _externalSupplier;
+    private readonly ILoggerClass _logger;
+    private readonly IMonitorClass _monitor;
+    private readonly DataProviderClass _dataProviderClass;
+    private readonly IBusinessLogicClass _businessLogic;
+    private readonly IFeatureServiceClass _featureService;
 
-#### Example 1
+    public LibraryClass(IExternalSupplierClass externalSupplier, 
+    ILoggerClass logger, 
+    IMonitorClass monitor, 
+    DataProviderClass dataProviderClass, 
+    IBusinessLogicClass businessLogic, 
+    IFeatureServiceClass featureService)
+    {
+        _externalSupplier = externalSupplier;
+        _logger = logger;
+        _monitor = monitor;
+        _dataProviderClass = dataProviderClass;
+        _businessLogic = businessLogic;
+        _featureService = featureService;
+    }
+
+    public string GetInfoFromExternalSupplierAndDb()
+    {
+        return $"Data from supplier: {_externalSupplier.GetDataFromUnreliableSupplier()}";
+    }
+    
+    // More code in the class...
+}
+```
+With EasyMoq all we have to do is this:
+```csharp
+[Fact]
+public void WithEasyMoqTest()
+{
+    var mockBuilder = new MockBuilder<ILibraryClass, LibraryClass>();
+
+    var mockDataFromSupplier = "Mocked data from test supplier";
+    var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
+
+    mockBuilder.GetRelatedMock<IExternalSupplierClass>()
+        .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+
+    var result = mockBuilder.GetTestedService().GetInfoFromExternalSupplierAndDb();
+    result.Should().Be(expectedResult);
+}
+```
+Basically, EasyMoq did all the rest for us. At least 10 lines of pointless code no longer needed, everything is dynamic and immune to irrelevant changes, and so nice and readable! ^_^
+
+### Another example:
 If we have the following classes and interfaces:
 ```csharp
-public interface IInterface1
-{
-    string Method1();
-}
-
-public class Class1 : IInterface1
-{
-    public virtual string Method1()
+    public interface IExternalSupplierClass
     {
-        return "Class1.Method1";
-    }
-}
-
-public class Class2
-{
-    private readonly IInterface1 _class1;
-
-    public Class2(IInterface1 class1)
-    {
-        _class1 = class1;
+        string GetDataFromUnreliableSupplier();
     }
 
-    public virtual string Method1UsingClass1Method1()
+    class ExternalSupplierClass : IExternalSupplierClass
     {
-        return "Class2.Method1" + _class1.Method1();
+        public string GetDataFromUnreliableSupplier()
+        {
+            return "Get data from unreliable supplier.";
+        }
     }
-}
 
-public interface IInterface3
+    public interface ILoggerClass
+    {
+        string LogMessage();
+    }
+
+    public class LoggerClass : ILoggerClass
+    {
+        public string LogMessage()
+        {
+            return "Logged a message";
+        }
+    }
+
+    public interface ILibraryClass
+    {
+        string GetInfoFromExternalSupplierAndDb();
+    }
+
+    public class LibraryClass : ILibraryClass
+    {
+        private readonly IExternalSupplierClass _externalSupplier;
+        private readonly ILoggerClass _logger;
+
+        public LibraryClass(IExternalSupplierClass externalSupplier, ILoggerClass logger)
+        {
+            _externalSupplier = externalSupplier;
+            _logger = logger;
+        }
+
+        public string GetInfoFromExternalSupplierAndDb()
+        {
+            return $"Data from supplier: {_externalSupplier.GetDataFromUnreliableSupplier()}";
+        }
+
+        public string MethodWeAreNotTestingRightNow()
+        {
+            return $"Logger message: {_logger.LogMessage()}";
+        }
+    }
+```
+Then normally, in order to test LibraryClass, we would normally do the following:
+```csharp
+[Fact]
+public void OldWayTest()
 {
-    string UsingClass2Method1();
+    var mockDataFromSupplier = "Mocked data from test supplier";
+    var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
+
+    var loggerMock = new Mock<ILoggerClass>();
+    var externalSupplierClassMock = new Mock<IExternalSupplierClass>();
+    externalSupplierClassMock.Setup(x => x.GetDataFromUnreliableSupplier())
+        .Returns(() => mockDataFromSupplier);
+
+    var testedService = new LibraryClass(externalSupplierClassMock.Object, loggerMock.Object);
+
+    var result = testedService.GetInfoFromExternalSupplierAndDb();
+    result.Should().Be(expectedResult);
 }
 ```
-
-And we use them in a third class as follows:
+#### But instead, with this framework it will be one of following two options:
+1.
 ```csharp
-public class Class3 : IInterface3
+[Fact]
+public void WithEasyMoqTest()
 {
-    private readonly Class2 _class2;
+    var mockBuilder = new MockBuilder<ILibraryClass, LibraryClass>();
 
-    public Class3(Class2 class2)
-    {
-        _class2 = class2;
-    }
+    var mockDataFromSupplier = "Mocked data from test supplier";
+    var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
 
-    public string UsingClass2Method1()
-    {
-        return "Class3.UsingClass2Method1() = " + _class2.Method1UsingClass1Method1();
-    }
+    mockBuilder.GetRelatedMock<IExternalSupplierClass>()
+        .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+
+    var result = mockBuilder.GetTestedService().GetInfoFromExternalSupplierAndDb();
+    result.Should().Be(expectedResult);
 }
 ```
-Then normally, in order to test Class3, we would normally do the following:
+2.
 ```csharp
-public void Test()
-{
-    var mockIInterface1 = new Mock<IInterface1>();
-    var mockClass2 = new Mock<Class2>(mockIInterface1.Object);
-    mockClass2.CallBase = true;
-
-    mockIInterface1.Setup(x => x.Method1()).Returns("+test");
-
-    var testedClass = new Class3(mockClass2.Object);
-
-    var testResult = testedClass.UsingClass2Method1();
-
-    testResult.Should().Be("Class3.UsingClass2Method1() = Class2.Method1+test");
-}
-```
-
-**But instead, with this framework it will be 1 of two options:**
-
-1)
-```csharp
-public class TestWithEasyMoq1 : BaseServiceTest<IInterface3, Class3>
+public class LibraryClassWithBaseTests : BaseServiceTest<ILibraryClass, LibraryClass>
 {
     [Fact]
-    public void Test()
+    public void WithEasyMoqTest()
     {
-        GetRelatedMock<IInterface1>().Setup(x => x.Method1()).Returns("+test");
+        var mockDataFromSupplier = "Mocked data from test supplier";
+        var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
 
-        var testResult = GetTestedService().UsingClass2Method1();
-        testResult.Should().Be("Class3.UsingClass2Method1() = Class2.Method1+test");
+        GetRelatedMock<IExternalSupplierClass>()
+            .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+
+        var result = GetTestedService().GetInfoFromExternalSupplierAndDb();
+        result.Should().Be(expectedResult);
     }
 }
 ```
-2)
-```csharp
-public class TestWithEasyMoq2
-{
-    [Fact]
-    public void Test()
-    {
-        var mockBuilder = new MockBuilder<IInterface3, Class3>(true);
-        mockBuilder.GetRelatedMock<IInterface1>().Setup(x => x.Method1()).Returns("+test");
+* Notice the improvement in readability!
+* Notice the reduction in the number of lines. We went down from 9 lines to 6/7 lines, and this is just with 2 dependencies!
 
-        var testResult = mockBuilder.GetTestedService().UsingClass2Method1();
-        testResult.Should().Be("Class3.UsingClass2Method1() = Class2.Method1+test");
-    }
-}
-```
-
-So, in this example we had only 1 class/interface in each constructor, but many times we have 10 or 20, especially when using IOC, and this tool saves a lot of code, which later also needs to be maintained.
-
-
-
-## More examples and documentation will come soon :)
+## Advantages/features:
+- Saves many lines of code. ([See a Simple EasyMoq Example](https://github.com/Oshryh/EasyMoq/wiki/Simple-Mock-2))
+- Makes tests more flexible and durable (since there's no need to fix all the tests when a something like ILogger or IMonitor is added to some constructor) and makes life easier.
+- Enables you to test imperfect code by defaultively leaving the original functionality accessible (examples will be added, for now see tests)
+- Can couple an interface with a class, and by that enable the use any of the class's original functionality through the tested class without mocking or creating anything. Any functionality which is mocked will still use the mock and not the base. (examples will be added, for now see tests)
+- Provides a solution for mocking static dependencies with minimal code change. (will add an example of how to implement soon)
+- 🆕 Added the IntegrationTestMockBuilder class which takes a container, and specific classes/interfaces to mock, and mocks only requested classes/interfaces, while using the normal behaviour of rest of the dependencies. This is intended for usage in integration tests, where we sometimes want to mock just one method which get changing data from the DB or calls an unreliable third party, but still test the rest of the process. ([See an example here](https://github.com/Oshryh/EasyMoq/wiki/Integration-Test-Mock-1))
