@@ -265,6 +265,9 @@ namespace EasyMoq
                 .ConfigureAwait(false);
             _typeMocker.RegisterTypes(typesToRegister, TestConfiguration.GetImplementationTypes());
 
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
+                _mockBuilderContainer.Install(_windsorInstaller);
+
             await Task.WhenAll(TestConfiguration.GetMockActions().Select(p => Task.Run(() => p(this))).ToArray())
                 .ConfigureAwait(false);
 
@@ -282,8 +285,6 @@ namespace EasyMoq
 
             if (TestConfiguration.MockStrategy == MockStrategy.Integration)
             {
-                _mockBuilderContainer.Install(_windsorInstaller);
-
                 _autoMoqSubResolver = new AutoMoqResolver(_mockBuilderContainer.Kernel);
                 _mockBuilderContainer.Kernel.Resolver.AddSubResolver(_autoMoqSubResolver);
             }
