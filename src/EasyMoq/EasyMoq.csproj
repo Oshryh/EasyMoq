@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-    <Version>1.0.84</Version>
+    <Version>1.0.89</Version>
     <PackageId>EasyMoq</PackageId>
     <PackageProjectUrl>https://github.com/Oshryh/EasyMoq</PackageProjectUrl>
     <PackageTags>Mock;Moq;Test;UnitTest;IntegrationTest;</PackageTags>
@@ -12,8 +12,8 @@
     <Copyright>Copyright 2019 Oshry Horn</Copyright>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.84.0</AssemblyVersion>
-    <FileVersion>1.0.84.0</FileVersion>
+    <AssemblyVersion>1.0.89.0</AssemblyVersion>
+    <FileVersion>1.0.89.0</FileVersion>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>

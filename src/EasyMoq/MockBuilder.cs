@@ -51,7 +51,7 @@ namespace EasyMoq
             where TService : class
         {
             var testBuilder = new MockBuilder<TService>();
-            //func.Invoke(testBuilder);
+            testBuilder.AddTestDependencies(testDependencies);
 
             return testBuilder;
         }
@@ -61,7 +61,7 @@ namespace EasyMoq
             where TService : class, TIService
         {
             var testBuilder = new MockBuilder<TIService, TService>();
-            //func.Invoke(testBuilder);
+            testBuilder.AddTestDependencies(testDependencies);
 
             return testBuilder;
         }
@@ -106,7 +106,7 @@ namespace EasyMoq
             where TService : class
         {
             var testBuilder = new MockBuilder<TService>(windsorInstaller);
-            //func.Invoke(testBuilder);
+            testBuilder.AddTestDependencies(testDependencies);
 
             return testBuilder;
         }
@@ -116,11 +116,10 @@ namespace EasyMoq
             where TService : class, TIService
         {
             var testBuilder = new MockBuilder<TIService, TService>(windsorInstaller);
-            //func.Invoke(testBuilder);
+            testBuilder.AddTestDependencies(testDependencies);
 
             return testBuilder;
         }
-
 
         #endregion
     }
@@ -140,10 +139,7 @@ namespace EasyMoq
 
         private bool _built;
 
-        protected MockStrategy MockStrategy { get; }
-        protected List<Type> TypesToMock { get; }
-
-        public TestConfiguration TestConfiguration { get; } = new TestConfiguration();
+        public TestConfiguration TestConfiguration { get; }
 
         #region Public Methods
 
@@ -163,15 +159,14 @@ namespace EasyMoq
 
         internal MockBuilder()
         {
-            MockStrategy = MockStrategy.UnitTest;
+            TestConfiguration = new TestConfiguration(MockStrategy.UnitTest);
             InitializeNewMockBuilder();
         }
 
         internal MockBuilder(IWindsorInstaller windsorInstaller)
         {
+            TestConfiguration = new TestConfiguration(MockStrategy.Integration);
             _windsorInstaller = windsorInstaller;
-            MockStrategy = MockStrategy.Integration;
-            TypesToMock = new List<Type>();
             InitializeNewMockBuilder();
         }
 
@@ -181,7 +176,8 @@ namespace EasyMoq
 
         protected Mock<T> GetRelatedMock<T>() where T : class
         {
-            if (MockStrategy == MockStrategy.Integration && !TypesToMock.Contains(typeof(T)))
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration
+                && !TestConfiguration.IsTypeToMock<T>())
                 throw new Exception(
                     $"The type {typeof(T).Name} was not set as a type to be mocked.");
 
@@ -189,20 +185,31 @@ namespace EasyMoq
             return mock;
         }
 
-        protected void AddTestDependencies(params ITestDependencyImplementation[] testDependencies)
+        private void AddTestDependency(ITestDependency testDependency)
         {
-            foreach (var testDependency in testDependencies)
+            var dependencyType = testDependency.GetDependencyType();
+
+            if (dependencyType == null && !testDependency.IsStatic)
+                return;
+
+            if (testDependency.IsStatic)
+                TestConfiguration.AddTypeToBeMockedAsStatic(dependencyType);
+            else
             {
-                TestConfiguration.CoupleInterfaceWithClass(
-                    testDependency.GetDependencyType(),
-                    testDependency.GetDependencyChildType());
+                if (TestConfiguration.MockStrategy == MockStrategy.Integration)
+                    TestConfiguration.AddTypeToMock(dependencyType);
+
+                var childType = testDependency.GetDependencyChildType();
+                if (childType != null)
+                    TestConfiguration.CoupleInterfaceWithClass(dependencyType, childType);
             }
+
+            testDependency.GetMockedDependencyActions().ForEach(TestConfiguration.AddMockToRun);
         }
 
-        protected void AddTestDependenciesToMock(params ITestDependencyImplementation[] testDependencies)
+        protected void AddTestDependencies(params ITestDependency[] testDependencies)
         {
-            AddTestDependencies(testDependencies);
-            TypesToMock.AddRange(testDependencies.Select(p=>p.GetDependencyType()));
+            testDependencies.ToList().ForEach(AddTestDependency);
         }
 
         protected void AddTestMockActions(params ITestMockedDependencyAction[] mockActions)
@@ -236,15 +243,17 @@ namespace EasyMoq
 
             var typesToRegister = new List<Type>();
 
-            if (MockStrategy == MockStrategy.Integration)
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
             {
-                TypesToMock.AddRange(TestConfiguration.GetTypesToBeMockedAsStatic());
-                _autoMoqSubResolver.AddRegisteredTypeRange(TypesToMock);
+                TestConfiguration.AddTypesToMock(TestConfiguration.GetTypesToBeMockedAsStatic());
+                TestConfiguration.AddTypeToMock(testedTypeToRegister);
 
-                typesToRegister = TypesToMock;
+                typesToRegister = TestConfiguration.GetTypesToMock().ToList();
+
+                _autoMoqSubResolver.AddRegisteredTypeRange(typesToRegister);
             }
 
-            if (MockStrategy == MockStrategy.UnitTest)
+            if (TestConfiguration.MockStrategy == MockStrategy.UnitTest)
             {
                 ApplyDefaultClassesForInterfacesFromAssemblies();
                 typesToRegister = _typeHelpers.GetTypesDependencies(typeof(TService));
@@ -255,6 +264,9 @@ namespace EasyMoq
                     .Select(p => Task.Run(() => AddStaticOfMockToContainer(p))))
                 .ConfigureAwait(false);
             _typeMocker.RegisterTypes(typesToRegister, TestConfiguration.GetImplementationTypes());
+
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
+                _mockBuilderContainer.Install(_windsorInstaller);
 
             await Task.WhenAll(TestConfiguration.GetMockActions().Select(p => Task.Run(() => p(this))).ToArray())
                 .ConfigureAwait(false);
@@ -271,16 +283,14 @@ namespace EasyMoq
         {
             _mockBuilderContainer = new WindsorContainer();
 
-            if (MockStrategy == MockStrategy.Integration)
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
             {
-                _mockBuilderContainer.Install(_windsorInstaller);
-
                 _autoMoqSubResolver = new AutoMoqResolver(_mockBuilderContainer.Kernel);
                 _mockBuilderContainer.Kernel.Resolver.AddSubResolver(_autoMoqSubResolver);
             }
 
             _typeHelpers = new TypeHelpers(TestConfiguration);
-            _typeMocker = new TypeMocker(_mockBuilderContainer, _typeHelpers, MockStrategy);
+            _typeMocker = new TypeMocker(_mockBuilderContainer, _typeHelpers, TestConfiguration.MockStrategy);
         }
 
         private void ApplyDefaultClassesForInterfacesFromAssemblies()
@@ -308,7 +318,7 @@ namespace EasyMoq
     /// Provides full recursive mocking of all the dependent classes, and methods to help with testing.
     /// </summary>
     /// <typeparam name="TService">The service being test.</typeparam>
-    public class MockBuilder<TService> : MockBuilder, IMockBuilder<TService>, 
+    public class MockBuilder<TService> : MockBuilder, IMockBuilder<TService>,
         IUnitTestBuilderOf<TService>, IIntegrationTestBuilderOf<TService>
         where TService : class
     {
@@ -344,7 +354,7 @@ namespace EasyMoq
 
         #region IUnitTestBuilderOf<TService> Implementation
 
-        IUnitTestBuilderOf<TService> IUnitTestBuilderOf<TService>.WithTestDependencies(params ITestDependencyImplementation[] testDependencies)
+        IUnitTestBuilderOf<TService> IUnitTestBuilderOf<TService>.WithTestDependencies(params ITestDependency[] testDependencies)
         {
             AddTestDependencies(testDependencies);
             return this;
@@ -366,7 +376,7 @@ namespace EasyMoq
 
         #region IIntegrationTestBuilderOf<TService> Implementation
 
-        IIntegrationTestBuilderOf<TService> IIntegrationTestBuilderOf<TService>.WithTestDependenciesToMock(params ITestDependencyImplementation[] testDependencies)
+        IIntegrationTestBuilderOf<TService> IIntegrationTestBuilderOf<TService>.WithTestDependenciesToMock(params ITestDependency[] testDependencies)
         {
             AddTestDependencies(testDependencies);
             return this;
@@ -401,15 +411,15 @@ namespace EasyMoq
         public MockBuilder()
         {
             TestConfiguration.CoupleInterfaceWithClass<TIService, TService>();
-            if (MockStrategy == MockStrategy.Integration)
-                TypesToMock.Add(typeof(TIService));
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
+                TestConfiguration.AddTypeToMock<TIService>();
         }
 
         internal MockBuilder(IWindsorInstaller windsorInstaller) : base(windsorInstaller)
         {
             TestConfiguration.CoupleInterfaceWithClass<TIService, TService>();
-            if (MockStrategy == MockStrategy.Integration)
-                TypesToMock.Add(typeof(TIService));
+            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
+                TestConfiguration.AddTypeToMock<TIService>();
         }
 
         private new async Task BuildAsync()
@@ -436,7 +446,7 @@ namespace EasyMoq
 
         #region IUnitTestBuilderOf<TIService, TService> Implementation
 
-        IUnitTestBuilderOf<TIService, TService> IUnitTestBuilderOf<TIService, TService>.WithTestDependencies(params ITestDependencyImplementation[] testDependencies)
+        IUnitTestBuilderOf<TIService, TService> IUnitTestBuilderOf<TIService, TService>.WithTestDependencies(params ITestDependency[] testDependencies)
         {
             AddTestDependencies(testDependencies);
             return this;
@@ -458,9 +468,9 @@ namespace EasyMoq
 
         #region IIntegrationTestBuilderOf<TIService, TService> Implementation
 
-        IIntegrationTestBuilderOf<TIService, TService> IIntegrationTestBuilderOf<TIService, TService>.WithTestDependenciesToMock(params ITestDependencyImplementation[] testDependencies)
+        IIntegrationTestBuilderOf<TIService, TService> IIntegrationTestBuilderOf<TIService, TService>.WithTestDependenciesToMock(params ITestDependency[] testDependencies)
         {
-            AddTestDependenciesToMock(testDependencies);
+            AddTestDependencies(testDependencies);
             return this;
         }
 
