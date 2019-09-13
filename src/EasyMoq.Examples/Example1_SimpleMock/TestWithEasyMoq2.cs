@@ -19,13 +19,12 @@ namespace EasyMoq.Examples.Example1_SimpleMock
 
             //var mockBuilder1 = MockBuilder.UnitTest<Class3>(config => config
             //    .WithTestDependencies(
-            //        TestDependency.OfInterface<IInterface1>().ImplementedBy<Class1>(),
-            //        TestDependency.OfInterface<IInterface1>().ImplementedBy<Class1>())
+            //        TestDependency.Of<IInterface1>().ImplementedBy<Class1>())
             //    .WithTestMockActions(
-            //        TestDependency.OfMock<IInterface1>()
+            //        TestDependency.Of<IInterface1>()
             //            .WithAction(supplier => supplier.Setup(x => x.Method1()).Returns("+test"))
             //            .AndAction(supplier => supplier.Setup(x => x.Method1()).Returns("+test")),
-            //        TestDependency.OfMock<IInterface1>().WithAction(supplier => supplier.Setup(x => x.Method1()).Returns("+test")))
+            //        TestDependency.Of<IInterface1>().WithAction(supplier => supplier.Setup(x => x.Method1()).Returns("+test")))
             //    .WithTestStaticDependencies(
             //        TestDependency.OfStatic<IInterface1>())
             //        );

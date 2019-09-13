@@ -26,13 +26,13 @@ namespace EasyMoq.Examples.Example1a_SimpleMock
         [Fact]
         public void WithEasyMoqTest()
         {
-            var mockBuilder = new MockBuilder<ILibraryClass, LibraryClass>();
+            var mockBuilder = MockBuilder.UnitTest<ILibraryClass, LibraryClass>();
 
             var mockDataFromSupplier = "Mocked data from test supplier";
             var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
 
-            mockBuilder.GetRelatedMock<IExternalSupplierClass>()
-                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+            mockBuilder.AddMockActionOf<IExternalSupplierClass>(mock => mock
+                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier));
 
             var result = mockBuilder.GetTestedService().GetInfoFromExternalSupplierAndDb();
             result.Should().Be(expectedResult);
@@ -47,8 +47,8 @@ namespace EasyMoq.Examples.Example1a_SimpleMock
             var mockDataFromSupplier = "Mocked data from test supplier";
             var expectedResult = $"Data from supplier: {mockDataFromSupplier}";
 
-            GetRelatedMock<IExternalSupplierClass>()
-                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier);
+            AddMockActionOf<IExternalSupplierClass>(mock => mock
+                .Setup(x => x.GetDataFromUnreliableSupplier()).Returns(() => mockDataFromSupplier));
 
             var result = GetTestedService().GetInfoFromExternalSupplierAndDb();
             result.Should().Be(expectedResult);

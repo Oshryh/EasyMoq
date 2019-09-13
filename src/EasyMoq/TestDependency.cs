@@ -18,7 +18,7 @@ namespace EasyMoq
         public static ITestStaticDependency<TStaticDependency> OfStatic<TStaticDependency>()
             where TStaticDependency : class
         {
-            return new TestDependency<TStaticDependency>();
+            return new TestDependency<TStaticDependency>(true);
         }
     }
 
@@ -31,23 +31,20 @@ namespace EasyMoq
     {
         private readonly List<Action<Mock<TDependencyType>>> _mockActions =
             new List<Action<Mock<TDependencyType>>>();
-
-        private readonly Type _dependencyInterfaceType;
+        private readonly Type _dependencyType;
         private Type _dependencyClassType;
 
-        internal TestDependency()
-        {
-            var dependencyType = typeof(TDependencyType);
+        public bool IsStatic { get; }
 
-            if (dependencyType.IsInterface)
-                _dependencyInterfaceType = dependencyType;
-            else
-                _dependencyClassType = dependencyType;
+        internal TestDependency(bool isStatic = false)
+        {
+            IsStatic = isStatic;
+            _dependencyType = typeof(TDependencyType);
         }
 
         public Type GetDependencyType()
         {
-            return _dependencyInterfaceType;
+            return _dependencyType;
         }
 
         public Type GetDependencyChildType()
@@ -57,10 +54,12 @@ namespace EasyMoq
 
         public Type GetStaticDependencyType()
         {
+            if (!IsStatic) return null;
+
             return GetDependencyType();
         }
 
-        public IEnumerable<Action<MockBuilder>> GetMockedDependencyActions()
+        public List<Action<MockBuilder>> GetMockedDependencyActions()
         {
             return _mockActions.Select(mockAction =>
                     (Action<MockBuilder>)(mockBuilder => mockBuilder.AddMockActionOf(mockAction)))
