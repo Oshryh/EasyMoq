@@ -251,6 +251,8 @@ namespace EasyMoq
                 typesToRegister = TestConfiguration.GetTypesToMock().ToList();
 
                 _autoMoqSubResolver.AddRegisteredTypeRange(typesToRegister);
+
+                _mockBuilderContainer.Install(_windsorInstaller);
             }
 
             if (TestConfiguration.MockStrategy == MockStrategy.UnitTest)
@@ -264,9 +266,6 @@ namespace EasyMoq
                     .Select(p => Task.Run(() => AddStaticOfMockToContainer(p))))
                 .ConfigureAwait(false);
             _typeMocker.RegisterTypes(typesToRegister, TestConfiguration.GetImplementationTypes());
-
-            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
-                _mockBuilderContainer.Install(_windsorInstaller);
 
             await Task.WhenAll(TestConfiguration.GetMockActions().Select(p => Task.Run(() => p(this))).ToArray())
                 .ConfigureAwait(false);

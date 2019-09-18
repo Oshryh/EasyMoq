@@ -1,7 +1,7 @@
-﻿using Moq;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using EasyMoq.Interfaces;
+using Moq;
 
 namespace EasyMoq
 {
