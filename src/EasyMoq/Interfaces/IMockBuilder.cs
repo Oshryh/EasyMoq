@@ -6,7 +6,7 @@ namespace EasyMoq.Interfaces
 {
     public interface IMockBuilder : IDisposable
     {
-        TestConfiguration TestConfiguration { get; }
+        ITestConfiguration TestConfiguration { get; }
 
         void AddMockActionOf<T>(Action<Mock<T>> mockAction) where T : class;
 

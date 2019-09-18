@@ -2,28 +2,58 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using EasyMoq.Interfaces;
 
 namespace EasyMoq
 {
-    public class TestConfiguration
+    public class TestConfiguration : ITestConfiguration
     {
+
+        #region Private Read-Only Members
+
         private readonly List<Type> _typesToBeMockedAsStatic = new List<Type>();
         private readonly Dictionary<Type, Type> _implementationTypes = new Dictionary<Type, Type>();
         private readonly List<Action<MockBuilder>> _mocksToRun = new List<Action<MockBuilder>>();
         private readonly List<Type> _typesToMock = new List<Type>();
-        public MockStrategy MockStrategy { get; }
+        private readonly List<string> _assembliesWildcards = new List<string>();
+
+        #endregion
+
+        #region Private Members
 
         private bool _rebuildRequired = true;
+
+        #endregion
+
+        #region Public Properties
+
+        public MockStrategy MockStrategy { get; }
+
+        public bool UseDefaultClassesForInterfacesFromAssemblies { get; set; }
+
+        public List<Type> AllRunningRelevantTypes { get; private set; } = new List<Type>();
+
+        #endregion
+
+        #region Constructors
 
         public TestConfiguration(MockStrategy mockStrategy)
         {
             MockStrategy = mockStrategy;
         }
 
-        public List<string> AssembliesNamesParts { get; } = new List<string>();
-        public bool UseDefaultClassesForInterfacesFromAssemblies { get; set; }
+        #endregion
 
-        public List<Type> AllRunningRelevantTypes { get; private set; } = new List<Type>();
+        #region Private Methods
+
+        private void SetConfigurationRebuildRequired()
+        {
+            _rebuildRequired = true;
+        }
+
+        #endregion
+
+        #region Public Methods
 
         public bool IsTypeToMock(Type typesToMock)
         {
@@ -59,7 +89,7 @@ namespace EasyMoq
         public void AddMockToRun(Action<MockBuilder> mockAction)
         {
             if (_mocksToRun.Any(p => p.Method == mockAction.Method && p.Target == mockAction.Target)) return;
-            
+
             _mocksToRun.Add(mockAction);
             SetConfigurationRebuildRequired();
         }
@@ -83,7 +113,7 @@ namespace EasyMoq
 
         public void AddAssemblyNamePartFilter(string assemblyNamePartFilter)
         {
-            AssembliesNamesParts.Add(assemblyNamePartFilter);
+            _assembliesWildcards.Add(assemblyNamePartFilter);
             SetConfigurationRebuildRequired();
         }
 
@@ -102,29 +132,32 @@ namespace EasyMoq
             return _implementationTypes.TryGetValue(parameterType, out inheritingClass);
         }
 
-        private void SetConfigurationRebuildRequired()
-        {
-            _rebuildRequired = true;
-        }
-
-        internal void SetRunningRelevantTypes(List<Type> allRunningRelevantTypes)
+        public void SetRunningRelevantTypes(List<Type> allRunningRelevantTypes)
         {
             AllRunningRelevantTypes = allRunningRelevantTypes;
         }
 
-        internal void SetConfigurationBuilt()
+        public void SetConfigurationBuilt()
         {
             _rebuildRequired = false;
         }
 
-        internal bool IsConfigurationRebuildRequired()
+        public bool IsConfigurationRebuildRequired()
         {
             return _rebuildRequired;
         }
 
-        internal List<Action<MockBuilder>> GetMockActions()
+        public IReadOnlyList<Action<MockBuilder>> GetMockActions()
         {
             return _mocksToRun;
         }
+
+        public IReadOnlyList<string> GetAssembliesWildcards()
+        {
+            return _assembliesWildcards;
+        }
+
+        #endregion
+
     }
 }

@@ -7,7 +7,6 @@ using Castle.Windsor;
 using EasyMoq.Interfaces;
 using EasyMoq.Interfaces.TestDependencyInterfaces;
 using Moq;
-using Component = Castle.MicroKernel.Registration.Component;
 
 namespace EasyMoq
 {
@@ -131,7 +130,7 @@ namespace EasyMoq
     {
         private readonly IWindsorInstaller _windsorInstaller;
 
-        private AutoMoqResolver _autoMoqSubResolver;
+        private IAutoMoqResolver _autoMoqSubResolver;
         private IWindsorContainer _mockBuilderContainer;
 
         private TypeHelpers _typeHelpers;
@@ -139,7 +138,7 @@ namespace EasyMoq
 
         private bool _built;
 
-        public TestConfiguration TestConfiguration { get; }
+        public ITestConfiguration TestConfiguration { get; }
 
         #region Public Methods
 
@@ -251,6 +250,8 @@ namespace EasyMoq
                 typesToRegister = TestConfiguration.GetTypesToMock().ToList();
 
                 _autoMoqSubResolver.AddRegisteredTypeRange(typesToRegister);
+
+                _mockBuilderContainer.Install(_windsorInstaller);
             }
 
             if (TestConfiguration.MockStrategy == MockStrategy.UnitTest)
@@ -264,9 +265,6 @@ namespace EasyMoq
                     .Select(p => Task.Run(() => AddStaticOfMockToContainer(p))))
                 .ConfigureAwait(false);
             _typeMocker.RegisterTypes(typesToRegister, TestConfiguration.GetImplementationTypes());
-
-            if (TestConfiguration.MockStrategy == MockStrategy.Integration)
-                _mockBuilderContainer.Install(_windsorInstaller);
 
             await Task.WhenAll(TestConfiguration.GetMockActions().Select(p => Task.Run(() => p(this))).ToArray())
                 .ConfigureAwait(false);
@@ -295,11 +293,12 @@ namespace EasyMoq
 
         private void ApplyDefaultClassesForInterfacesFromAssemblies()
         {
+            var assembliesWildcards = TestConfiguration.GetAssembliesWildcards();
             if (TestConfiguration.UseDefaultClassesForInterfacesFromAssemblies
-                && TestConfiguration.AssembliesNamesParts.Any())
+                && assembliesWildcards.Any())
             {
                 var allRunningRelevantTypes =
-                    _typeHelpers.GetAllTypesFromAssemblies(TestConfiguration.AssembliesNamesParts);
+                    _typeHelpers.GetAllTypesFromAssemblies(assembliesWildcards);
                 TestConfiguration.SetRunningRelevantTypes(allRunningRelevantTypes);
             }
         }

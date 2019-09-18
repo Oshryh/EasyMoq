@@ -1,14 +1,15 @@
-﻿using Castle.Core;
-using Castle.MicroKernel;
-using Castle.MicroKernel.Context;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core;
+using Castle.MicroKernel;
+using Castle.MicroKernel.Context;
+using EasyMoq.Interfaces;
+using Moq;
 
 namespace EasyMoq
 {
-    public class AutoMoqResolver : ISubDependencyResolver
+    public class AutoMoqResolver : IAutoMoqResolver
     {
         private readonly IKernel _kernel;
         private readonly List<Type> _registeredTypes = new List<Type>();

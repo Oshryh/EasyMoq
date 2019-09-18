@@ -1,7 +1,7 @@
-﻿using Moq;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using EasyMoq.Interfaces;
+using Moq;
 
 namespace EasyMoq
 {
@@ -14,7 +14,7 @@ namespace EasyMoq
             return (T)_mockBuilder;
         }
 
-        public TestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
+        public ITestConfiguration TestConfiguration => _mockBuilder.TestConfiguration;
 
         protected BaseServiceTest(IMockBuilder mockBuilder)
         {

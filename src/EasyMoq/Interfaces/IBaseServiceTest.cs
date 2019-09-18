@@ -7,7 +7,7 @@ namespace EasyMoq.Interfaces
 
     public interface IBaseServiceTest
     {
-        TestConfiguration TestConfiguration { get; }
+        ITestConfiguration TestConfiguration { get; }
 
         void AddMockActionOf<T>(Action<Mock<T>> mockAction) where T : class;
     }
