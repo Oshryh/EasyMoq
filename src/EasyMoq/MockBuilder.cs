@@ -139,7 +139,7 @@ namespace EasyMoq
 
         private bool _built;
 
-        public TestConfiguration TestConfiguration { get; }
+        public ITestConfiguration TestConfiguration { get; }
 
         #region Public Methods
 
@@ -294,11 +294,12 @@ namespace EasyMoq
 
         private void ApplyDefaultClassesForInterfacesFromAssemblies()
         {
+            var assembliesWildcards = TestConfiguration.GetAssembliesWildcards();
             if (TestConfiguration.UseDefaultClassesForInterfacesFromAssemblies
-                && TestConfiguration.AssembliesNamesParts.Any())
+                && assembliesWildcards.Any())
             {
                 var allRunningRelevantTypes =
-                    _typeHelpers.GetAllTypesFromAssemblies(TestConfiguration.AssembliesNamesParts);
+                    _typeHelpers.GetAllTypesFromAssemblies(assembliesWildcards);
                 TestConfiguration.SetRunningRelevantTypes(allRunningRelevantTypes);
             }
         }

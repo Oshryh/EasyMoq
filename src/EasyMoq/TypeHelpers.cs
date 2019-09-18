@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using EasyMoq.Interfaces;
 
 namespace EasyMoq
 {
     public class TypeHelpers
     {
-        private readonly TestConfiguration _testConfiguration;
+        private readonly ITestConfiguration _testConfiguration;
 
-        public TypeHelpers(TestConfiguration testConfiguration)
+        public TypeHelpers(ITestConfiguration testConfiguration)
         {
             _testConfiguration = testConfiguration;
         }
 
-        internal List<Type> GetAllTypesFromAssemblies(List<string> assembliesNamesParts)
+        internal List<Type> GetAllTypesFromAssemblies(IReadOnlyList<string> assembliesNamesParts)
         {
             var runningAssemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(p => assembliesNamesParts.Any(a => p.FullName.Contains(a)))
