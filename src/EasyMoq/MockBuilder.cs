@@ -131,7 +131,7 @@ namespace EasyMoq
     {
         private readonly IWindsorInstaller _windsorInstaller;
 
-        private AutoMoqResolver _autoMoqSubResolver;
+        private IAutoMoqResolver _autoMoqSubResolver;
         private IWindsorContainer _mockBuilderContainer;
 
         private TypeHelpers _typeHelpers;
