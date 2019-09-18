@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using EasyMoq.Interfaces.TestDependencyInterfaces;
 using Moq;
 

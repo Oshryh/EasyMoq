@@ -7,7 +7,6 @@ using Castle.Windsor;
 using EasyMoq.Interfaces;
 using EasyMoq.Interfaces.TestDependencyInterfaces;
 using Moq;
-using Component = Castle.MicroKernel.Registration.Component;
 
 namespace EasyMoq
 {
